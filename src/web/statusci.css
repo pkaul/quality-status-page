@@ -1,0 +1,80 @@
+body, table {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: black;
+    background: white;
+}
+
+.build {
+
+    min-width: 30px;
+    height: 3em;
+    border: 3px solid black;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.build-error {
+    background-color: #FF0000;
+    border-color: #800000;
+}
+
+.build-warn {
+    background-color: #808000;
+    border-color: #FFFF00;
+}
+
+.build-success {
+    background-color: #00FF00;
+    border-color: #008000;
+}
+
+.building.build-success {
+    -webkit-animation: building-success 2s infinite;
+    animation: building-success 2s infinite;
+}
+
+.loading, .loading-success, .loading-error {
+    background-image: url("./spinner.gif");
+    background-position: 90% 50%;
+    background-repeat: no-repeat;
+}
+
+.build h3 {
+    text-align: center;
+    margin: 0;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+.build a, .build a:visited, .build a:active {
+    text-decoration: none;
+    color: black;
+}
+
+.build a:hover {
+    text-decoration: underline;
+}
+
+.build progress {
+    text-align: center;
+}
+
+@keyframes building-success {
+    0% {
+        background-color: #008000;
+    }
+    100% {
+        background-color: #00FF00;
+    }
+}
+
+@-webkit-keyframes building-success {
+    0% {
+        background-color: #008000;
+    }
+    100% {
+        background-color: #00FF00;
+    }
+}

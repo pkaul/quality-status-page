@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "outDir": "target/web/"
+  },
+  "include": [
+    "src/web/**"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

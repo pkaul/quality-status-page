@@ -1,0 +1,20 @@
+image: node:latest
+
+stages:
+  - dist
+
+before_script:
+  - npm prune
+  - npm install
+  - npm install -g grunt-cli
+
+cache:
+  paths:
+    - node_modules/
+  key: "$CI_BUILD_REPO"
+
+dist:
+  stage: dist
+  script:
+    - grunt
+
