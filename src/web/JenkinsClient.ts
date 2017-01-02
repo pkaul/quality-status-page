@@ -9,7 +9,9 @@ import {Response} from "rest";
 
 import {Promise} from 'es6-shim';
 
-
+/**
+ * (REST-) client for fetching job/build data from Jenkins
+ */
 export class JenkinsClient {
 
     private _baseUrl:string;

@@ -3,14 +3,10 @@ import * as React from "react";
 
 const NAMESPACE:string = '_serverconfig';
 
-export interface ServerConfig {
-    id: string,
-    url: string,
-    username?:string,
-    password?:string
-}
 
-
+/**
+ * React component for defining server configurations)
+ */
 export class ServerConfigComponent extends React.Component<ServerConfig, any> {
 
     constructor(props: ServerConfig) {
@@ -27,6 +23,15 @@ export class ServerConfigComponent extends React.Component<ServerConfig, any> {
     public render() {
         return null;
     }
+}
+
+
+
+export interface ServerConfig {
+    id: string,
+    url: string,
+    username?:string,
+    password?:string
 }
 
 

@@ -1,24 +1,28 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {JenkinsJobComponent} from "./JenkinsJobComponent";
-import {ServerConfigComponent} from "./ServerConfigComponent";
 import ReactElement = React.ReactElement;
 
+/**
+ * Parses HTML and replaces custom elements by React components
+ */
 export class HtmlSubstitution {
 
-    // Maps Html element to React component
-    private static ELEMENT_MAPPINGS: Object = {
-        "server": ServerConfigComponent,
-        "jenkins_job": JenkinsJobComponent
-    };
+    private _elements:Object;
+
+    /**
+     * @param elements Mapping from element name to React class
+     */
+    constructor(elements:Object) {
+        this._elements = elements;
+    }
 
     public substitute(): void {
 
-        for (const elementName in HtmlSubstitution.ELEMENT_MAPPINGS) {
+        for (const elementName in this._elements) {
 
-            if (HtmlSubstitution.ELEMENT_MAPPINGS.hasOwnProperty(elementName)) {
+            if (this._elements.hasOwnProperty(elementName)) {
 
-                let reactComponentClass = HtmlSubstitution.ELEMENT_MAPPINGS[elementName];
+                let reactComponentClass = this._elements[elementName];
                 let elements: NodeListOf<Element> = document.getElementsByTagName(elementName);
 
                 //console.info("Substituting elements "+elementName+" ...");

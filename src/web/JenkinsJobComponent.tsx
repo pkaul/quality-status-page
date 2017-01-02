@@ -7,27 +7,13 @@ import {getConfig, ServerConfig} from "./ServerConfigComponent";
 
 
 
-export interface JobProperties {
-    server: string,
-    name: string
-}
-
-export interface JobState {
-
-    loadStatus: string;
-    buildCount?: number;
-    buildStatus?: string;
-    building?:boolean;
-    buildProgress?:number;
-    jobUrl?:string;
-    buildTimestamp?;
-}
-
-
 /**
- * Renders application version
+ * React component for rendering Jenkins job status
  *
- * Requires Plugin "CORS support for Jenkins" with "Access-Control-Allow-Methods": "GET", "Access-Control-Allow-Headers": "authorization", "Access-Control-Allow-Origins": "*"
+ * Requires Jenkins to have plugin "CORS support for Jenkins" installed with config:
+ *  "Access-Control-Allow-Methods": "GET",
+ *  "Access-Control-Allow-Headers": "authorization",
+ *  "Access-Control-Allow-Origins": "*"
  *
  */
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState> {
@@ -142,4 +128,23 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 }
 
+
+
+
+
+export interface JobProperties {
+    server: string,
+    name: string
+}
+
+export interface JobState {
+
+    loadStatus: string;
+    buildCount?: number;
+    buildStatus?: string;
+    building?:boolean;
+    buildProgress?:number;
+    jobUrl?:string;
+    buildTimestamp?;
+}
 
