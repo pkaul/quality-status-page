@@ -5,10 +5,16 @@ import {JenkinsJobComponent} from "./JenkinsJobComponent";
 import {ServerConfigComponent} from "./ServerConfigComponent";
 
 
-new HtmlSubstitution({
-    "server": ServerConfigComponent,
-    "jenkins_job": JenkinsJobComponent
-}).substitute();
+document.addEventListener("DOMContentLoaded", () => {
+    new HtmlSubstitution({
+        "server": ServerConfigComponent,
+        "jenkins_job": JenkinsJobComponent
+    }).substitute();
+});
+
+
+
+
 
 
 

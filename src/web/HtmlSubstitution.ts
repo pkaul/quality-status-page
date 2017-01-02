@@ -24,26 +24,35 @@ export class HtmlSubstitution {
 
                 let reactComponentClass = this._elements[elementName];
                 let elements: NodeListOf<Element> = document.getElementsByTagName(elementName);
+                if( elements.length === 0 ) {
+                    console.info("No elements "+elementName+" found");
+                }
 
                 //console.info("Substituting elements "+elementName+" ...");
 
                 for (let i: number = 0; i < elements.length; i++) {
 
-                    let element: Element = elements.item(i);
-                    let elementAttributes: Object = {};
+                    try {
+                        let element: Element = elements.item(i);
+                        let elementAttributes: Object = {};
 
-                    for (let j: number = 0; j < element.attributes.length; j++) {
+                        for (let j: number = 0; j < element.attributes.length; j++) {
 
-                        let attribute: Attr = element.attributes.item(j);
-                        elementAttributes[attribute.name] = attribute.value;
+                            let attribute: Attr = element.attributes.item(j);
+                            elementAttributes[attribute.name] = attribute.value;
+                        }
+
+                        console.info("Creating React element from " + elementName + " with " + JSON.stringify(elementAttributes));
+
+                        let reactElement: ReactElement<any> = React.createElement(reactComponentClass, elementAttributes, null);
+                        ReactDOM.render(reactElement, element);
                     }
-
-                    console.info("Creating React element from "+elementName+" with "+JSON.stringify(elementAttributes));
-
-                    let reactElement: ReactElement<any> = React.createElement(reactComponentClass, elementAttributes, null);
-                    ReactDOM.render(reactElement, element);
+                    catch(e) {
+                        console.warn("Error substituting "+elementName, e);
+                    }
                 }
             }
         }
+
     }
 }

@@ -3,25 +3,25 @@
 <head>
     <title>StatusCI Example Page</title>
     <link rel="stylesheet" href="./statusci.css"/>
+    <script type="text/javascript" src="./statusci.js"></script>
 </head>
 
 <body>
 <h1>StatusCI Example Page</h1>
 
-
 <server id="default" url="http://localhost:49001" username="admin" password="admin"></server>
 <table width="100%">
     <tr>
         <td>
-            <jenkins_job server="default" name="Test"/>
+            <jenkins_job server="default" name="Test"></jenkins_job>
         </td>
         <td>
-            <jenkins_job server="default" name="Test2"/>
+            <jenkins_job server="default" name="Test2"></jenkins_job>
         </td>
     </tr>
 </table>
 
-<script type="text/javascript" src="./statusci.js"></script>
+
 </body>
 
 
