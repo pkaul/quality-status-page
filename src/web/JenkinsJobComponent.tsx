@@ -18,7 +18,7 @@ import {getConfig, ServerConfig} from "./ServerConfigComponent";
  */
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState> {
 
-    private _period:number = 2000;
+    private _refreshInterval:number = 3000;
     private _triggerHandle:number;
 
     constructor(props: JobProperties) {
@@ -29,7 +29,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     public componentWillMount():void {
-        this.triggerLoadJob(this._period);
+        this.triggerLoadJob(this._refreshInterval);
     }
 
     public componentWillUnmount():void {
@@ -38,10 +38,30 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     public render() {
 
+        const now:number = new Date().getTime();
+
+        // age: distinct value between 0 and 5
+        let age:number = null;
+        if( !this.state.building && this.state.buildTimestamp ) {
+
+            // distinct age values are based on 6-hours intervals
+            age = Math.round((now - this.state.buildTimestamp) / 6 * 60 * 60 * 1000);
+            if (age < 0) {
+                age = 0;
+            }
+            if (age > 5) {
+                age = 5;
+            }
+        }
+
+
         // const jobUrl = this.state.jobUrl;
         let className:string = `build ${this.state.loadStatus} ${this.state.buildStatus}`;
         if( this.state.building ) {
             className += " building";
+        }
+        if( age ) {
+            className += " age-"+age;
         }
 
         let progressBar = null;
@@ -145,6 +165,6 @@ export interface JobState {
     building?:boolean;
     buildProgress?:number;
     jobUrl?:string;
-    buildTimestamp?;
+    buildTimestamp?:number;
 }
 
