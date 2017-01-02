@@ -13,6 +13,7 @@ body, table {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
+    text-align: center;
 }
 
 .status-error {
@@ -21,8 +22,8 @@ body, table {
 }
 
 .status-warn {
-    background-color: #808000;
-    border-color: #FFFF00;
+    background-color: #FFFF00;
+    border-color: #808000;
 }
 
 .status-success {
@@ -37,8 +38,19 @@ body, table {
 
 
 .building.status-success {
-    -webkit-animation: building-success 2s infinite;
     animation: building-success 2s infinite;
+}
+
+.building.status-warn {
+    animation: building-warn 2s infinite;
+}
+
+.building.status-error {
+    animation: building-error 2s infinite;
+}
+
+.building.status-none {
+    animation: building-none 2s infinite;
 }
 
 .loading-error {
@@ -65,27 +77,56 @@ body, table {
     text-decoration: underline;
 }
 
-.build progress {
-    text-align: center;
-}
 
 @keyframes building-success {
     0% {
-        background-color: #008000;
+        background-color: #00FF00;
+    }
+    50% {
+        background-color: #FFFFFF;
     }
     100% {
         background-color: #00FF00;
     }
 }
 
-@-webkit-keyframes building-success {
+@keyframes building-error {
     0% {
-        background-color: #008000;
+        background-color: #FF0000;
+    }
+    50% {
+        background-color: #FFFFFF;
     }
     100% {
-        background-color: #00FF00;
+        background-color: #FF0000;
     }
 }
+
+@keyframes building-warn {
+    0% {
+        background-color: #FFFF00;
+    }
+    50% {
+        background-color: #FFFFFF;
+    }
+    100% {
+        background-color: #FFFF00;
+    }
+}
+
+@keyframes building-none {
+    0% {
+        background-color: #c0c0c0;
+    }
+    50% {
+        background-color: #FFFFFF;
+    }
+    100% {
+        background-color: #c0c0c0;
+    }
+}
+
+
 
 .age-0 {
     opacity: 1;
@@ -109,4 +150,11 @@ body, table {
 
 .age-5 {
     opacity: 0.5;
+}
+
+
+.build progress {
+    display: inline;
+    height: 0.5em;
+    margin: 2px 10px 0 10px;
 }
