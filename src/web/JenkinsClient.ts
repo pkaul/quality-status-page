@@ -136,21 +136,40 @@ export interface JenkinsBuildResponse {
     timestamp:number
 }
 
+export enum JenkinsBuildStatus {
+    SUCCESS, WARN, ERROR, DISABLED, ABORTED, NOTBUILT, UNKNOWN
+}
+
 // ----------------------------
 
 
-export function isError(job:JenkinsJobResponse):boolean {
-    return !!job.color && job.color.startsWith("red");
-}
+export function getBuildStatus(job:JenkinsJobResponse):JenkinsBuildStatus {
 
-export function isWarning(job:JenkinsJobResponse):boolean {
-    return !!job.color && job.color.startsWith("yellow");
+    if(!job.color) {
+        return JenkinsBuildStatus.UNKNOWN;
+    }
+    else if( job.color.startsWith("red") ) {
+        return JenkinsBuildStatus.ERROR;
+    }
+    else if( job.color.startsWith("yellow") ) {
+        return JenkinsBuildStatus.WARN;
+    }
+    else if( job.color.startsWith("blue") ) {
+        return JenkinsBuildStatus.SUCCESS;
+    }
+    else if( job.color.startsWith("notbuilt") ) {
+        return JenkinsBuildStatus.NOTBUILT;
+    }
+    else if( job.color.startsWith("aborted") ) {
+        return JenkinsBuildStatus.ABORTED;
+    }
+    else if( job.color.startsWith("disabled") ) {
+        return JenkinsBuildStatus.DISABLED;
+    }
+    else {
+        return JenkinsBuildStatus.UNKNOWN;
+    }
 }
-
-export function isSuccessful(job:JenkinsJobResponse):boolean {
-    return !!job.color && job.color.startsWith("blue");
-}
-
 
 // TODO support notbuilt, aborted, disabled
 

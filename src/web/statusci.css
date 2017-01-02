@@ -15,22 +15,28 @@ body, table {
     border-radius: 5px;
 }
 
-.build-error {
+.status-error {
     background-color: #FF0000;
     border-color: #800000;
 }
 
-.build-warn {
+.status-warn {
     background-color: #808000;
     border-color: #FFFF00;
 }
 
-.build-success {
+.status-success {
     background-color: #00FF00;
     border-color: #008000;
 }
 
-.building.build-success {
+.status-none {
+    background-color: #c0c0c0;
+    border-color: #808080;
+}
+
+
+.building.status-success {
     -webkit-animation: building-success 2s infinite;
     animation: building-success 2s infinite;
 }

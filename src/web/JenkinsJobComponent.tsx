@@ -1,9 +1,9 @@
 import * as React from "react";
 import {
-    JenkinsClient, JenkinsJobResponse, isError, isWarning, isSuccessful, isBuilding,
-    JenkinsBuildResponse, getProgressPercent
+    JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus
 } from "./JenkinsClient";
 import {getConfig, ServerConfig} from "./ServerConfigComponent";
+import {Styles} from "./Styles";
 
 
 
@@ -29,7 +29,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     public componentWillMount():void {
-        this.triggerLoadJob(this._refreshInterval);
+        this.triggerLoadJob();
     }
 
     public componentWillUnmount():void {
@@ -68,7 +68,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         if( this.state.buildProgress < 1 ) {
             progressBar =  <progress value={this.state.buildProgress} max="100"></progress>;
         }
-        const infoString:string = "Date: "+new Date(this.state.buildTimestamp)+"\nTest: Hello";
+        const infoString:string = "Date: "+new Date(this.state.buildTimestamp)+"\nTest: Hello";   // TODO
 
 
         return <div className={className} title={infoString}>
@@ -79,15 +79,17 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     // --------------
 
-    private triggerLoadJob(interval:number):void {
+    private triggerLoadJob():void {
+
+        let interval:number = this._refreshInterval+Math.random()*500;
         this.setState({
-            "loadStatus": "loading"
+            "loadStatus": "loading",
         });
         this.loadJob().then((state: JobState) => {
                 this.setState(state);
-                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(interval), interval);
+                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(), interval);
             }).catch(() => {
-                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(interval), interval);
+                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(), interval);
             });
     }
 
@@ -105,7 +107,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                         "jobUrl": job.url,
                         "loadStatus": "loading-done",
                         "buildCount": job && job.builds ? job.builds.length : 0,
-                        "buildStatus": JenkinsJobComponent.asBuildStatus(job),
+                        "buildStatus": JenkinsJobComponent.asStatusStyle(job),
                         "building": isBuilding(job),
                         "buildProgress": getProgressPercent(build),
                         "buildTimestamp": build.timestamp,
@@ -115,7 +117,10 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
             }, (error: any) => {
                 console.log("Error " + error);
-                return {"loadStatus": "loading-error"};
+                return {
+                    "loadStatus": "loading-error",
+                    "buildStatus": Styles.STATUS_NONE
+                };
             }
         );
     }
@@ -131,19 +136,20 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         return getConfig(this.props.server);
     }
 
-    private static asBuildStatus(job:JenkinsJobResponse):string {
+    private static asStatusStyle(job:JenkinsJobResponse):string {
 
-        if( isError(job) ) {
-            return "build-error";
+        let status:JenkinsBuildStatus = getBuildStatus(job);
+        if( status === JenkinsBuildStatus.SUCCESS ) {
+            return Styles.STATUS_SUCCESS;
         }
-        else if( isWarning(job) ) {
-            return "build-warn";
+        else if( status === JenkinsBuildStatus.WARN ) {
+            return Styles.STATUS_WARN;
         }
-        else if( isSuccessful(job) ) {
-            return "build-success";
+        else if( status === JenkinsBuildStatus.ERROR ) {
+            return Styles.STATUS_ERROR;
         }
         else {
-            return "build-unknown";
+            return Styles.STATUS_NONE;
         }
     }
 }
