@@ -5,7 +5,7 @@ body, table {
     background: white;
 }
 
-.build {
+.status {
 
     min-width: 30px;
     height: 3em;
@@ -58,22 +58,22 @@ body, table {
 }
 
 .loading {
-    border-color: #D3D3D3;
+    border-color: #000000;
 }
 
-.build h3 {
+.status h3 {
     text-align: center;
     margin: 0;
     font-size: 11pt;
     font-weight: bold;
 }
 
-.build a, .build a:visited, .build a:active {
+.status a, .status a:visited, .status a:active {
     text-decoration: none;
     color: black;
 }
 
-.build a:hover {
+.status a:hover {
     text-decoration: underline;
 }
 
@@ -153,7 +153,7 @@ body, table {
 }
 
 
-.build progress {
+.status progress {
     display: inline;
     height: 0.5em;
     margin: 2px 10px 0 10px;

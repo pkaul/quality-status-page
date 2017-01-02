@@ -56,7 +56,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
 
         // const jobUrl = this.state.jobUrl;
-        let className:string = `build ${this.state.loadStatus} ${this.state.buildStatus}`;
+        let className:string = `status ${this.state.loadStatus} ${this.state.buildStatus}`;
         if( this.state.building ) {
             className += " building";
         }
