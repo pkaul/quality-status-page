@@ -2,5 +2,8 @@
 target
 node_modules
 .npm
+.idea
+.tscache
+*.iml
 
 
