@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
-    JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus, isSingleJob, isMultiJob, JenkinsJobRefResponse, JenkinsMultiJobResponse
+    JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus, isSingleJob, isMultiJob,
+    JenkinsJobRefResponse, JenkinsMultiJobResponse, getHealth
 } from "./JenkinsClient";
 import {getConfig, ServerConfig} from "./ServerConfigComponent";
 import {Styles} from "./Styles";
@@ -96,9 +97,13 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         if( job.building ) {
             progressBar =  <progress value={job.buildProgress} max="100"></progress>;
         }
-        const infoString:string = "Date: "+new Date(job.buildTimestamp)+"\nTest: Hello";   // TODO
 
-        return <div className={className} title={infoString}>
+        let info:string[] = ["Last built: "+new Date(job.buildTimestamp)];
+        if( job.buildHealth != null ) {
+             info.push("Health: "+job.buildHealth+"%");
+        }
+
+        return <div className={className} title={info.join("\n")}>
             <h3><a href={job.url} target="_blank">{job.name}</a></h3>
             {progressBar}
         </div>;
@@ -145,7 +150,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                             "buildStatus": JenkinsJobComponent.asStatusStyle(singleJob),
                             "building": isBuilding(singleJob),
                             "buildProgress": getProgressPercent(build),
-                            "buildTimestamp": build.timestamp
+                            "buildTimestamp": build.timestamp,
+                            "buildHealth": getHealth(singleJob)
                         } as JobState) as Promise<JobState | MultiJobState>
                     });
                 }
@@ -247,6 +253,7 @@ interface JobState extends LoadingState {
     // progress (0..100) for build to finish
     buildProgress:number;
     buildTimestamp:number;
+    buildHealth:number;
 }
 
 interface MultiJobState extends LoadingState {

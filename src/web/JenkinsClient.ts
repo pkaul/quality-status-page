@@ -154,6 +154,7 @@ export interface JenkinsJobResponse {
     builds: JenkinsBuildRefResponse[],
     lastBuild: JenkinsBuildRefResponse,
     color: string,
+    healthReport: JenkinsHealthReport[]
 
 }
 
@@ -199,6 +200,11 @@ export enum JenkinsBuildStatus {
     SUCCESS, WARN, ERROR, DISABLED, ABORTED, NOTBUILT, UNKNOWN
 }
 
+export interface JenkinsHealthReport {
+    score:number;
+}
+
+
 // ----------------------------
 
 /**
@@ -243,19 +249,31 @@ export function getBuildStatus(job:JenkinsJobResponse):JenkinsBuildStatus {
     }
 }
 
-// TODO support notbuilt, aborted, disabled
 
 export function isBuilding(job:JenkinsJobResponse):boolean {
     return !!job.color && job.color.indexOf("_anime") > -1;
 }
 
-/**
- * Age of a build in milliseconds
- */
-export function getAge(build:JenkinsBuildResponse):number {
+// /**
+//  * Age of a build in milliseconds
+//  */
+// export function getAge(build:JenkinsBuildResponse):number {
+//
+//     let now:number = new Date().getTime();
+//     return now - (!!build.timestamp ? build.timestamp : 0)
+// }
 
-    let now:number = new Date().getTime();
-    return now - (!!build.timestamp ? build.timestamp : 0)
+/**
+ * Fetches job's current health
+ */
+export function getHealth(job:JenkinsJobResponse):number {
+
+    if( job && job.healthReport && job.healthReport.length > 0 && job.healthReport[0].score ) {
+        return job.healthReport[0].score;
+    }
+    else {
+        return null;
+    }
 }
 
 /**
