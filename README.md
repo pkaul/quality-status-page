@@ -28,3 +28,20 @@ How to use
 	</table>
       </body>
       </html>
+
+Build
+---
+* Precondition: node.js is installed
+* `npm install`
+* `grunt`
+
+
+
+Jenkins Configuration
+---
+Fetching Jenkins job data is via AJAX is not allowed as a default. In order to enable Jenkins to serve data properly, these steps need to be executed
+* [Cors Filter Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Cors+Filter+Plugin) needs to be installed
+* In "Manage Jenkins" -> "Configure System" -> "CORS Filter" needs to be configured like
+        Is Enabled:                     true
+        Access-Control-Allow-Origins:   * (or a list of "host:port")
+        Access-Control-Allow-Methods:   GET

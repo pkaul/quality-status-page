@@ -24,6 +24,9 @@ export class JenkinsClient {
         this._password = password;
     }
 
+    /**
+     * Fetches job data
+     */
     public readJob(jobName: string): Promise<JenkinsJobResponse> {
 
         const url:string = this._baseUrl + "/job/" + encodeURIComponent(jobName) + "/api/json";
@@ -32,6 +35,9 @@ export class JenkinsClient {
         });
     }
 
+    /**
+     * Fetches job build data
+     */
     public readBuild(buildRef:JenkinsBuildRefResponse):Promise<JenkinsBuildResponse> {
 
         const url:string = buildRef.url + "/api/json";
@@ -44,15 +50,26 @@ export class JenkinsClient {
 
     private request(url:string):Promise<any> {
 
-        const client: Client = rest.wrap(basicAuth, {username: this._userName, password: this._password});
+        let client: Client = rest.getDefaultClient();
+
+        // if configured: send credentials via basic authorization
+        if(!!this._userName && !!this._password ) {
+            client = client.wrap(basicAuth, {username: this._userName, password: this._password});
+        }
+
+
+        client = client.wrap(defaultRequest, {
+            "method":   "GET",
+            "path":     url,
+            // enabling sending existing authentication cookie via CORS
+            "mixin":    {"withCredentials": true},
+        });
+
         const request: Request = {
-            "method": "GET",
-            "path": url,
-            "headers": {
-                // "Access-Control-Request-Headers": "authorization",
-                // "Access-Control-Expose-Headers": "Date"
-            }
+            // "method": "GET",
+            // "path": url
         };
+
 
         return new Promise<JenkinsJobResponse>((resolve:(r:any)=>void, reject:(reason:any) => void) => {
 
