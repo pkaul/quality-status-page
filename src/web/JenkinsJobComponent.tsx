@@ -65,7 +65,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         }
 
         let progressBar = null;
-        if( this.state.buildProgress < 1 ) {
+        if( this.state.building ) {
             progressBar =  <progress value={this.state.buildProgress} max="100"></progress>;
         }
         const infoString:string = "Date: "+new Date(this.state.buildTimestamp)+"\nTest: Hello";   // TODO
@@ -168,7 +168,9 @@ export interface JobState {
     loadStatus: string;
     buildCount?: number;
     buildStatus?: string;
+    // whether job is currently building
     building?:boolean;
+    // progress (0..100) for build to finish
     buildProgress?:number;
     jobUrl?:string;
     buildTimestamp?:number;

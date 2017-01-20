@@ -223,7 +223,7 @@ export function getProgressPercent(build:JenkinsBuildResponse):number {
         // wrong system time?
         return 0;
     }
-    return elapsedMillis / build.estimatedDuration;
+    return result;
 }
 
 
