@@ -7,27 +7,27 @@ JavaScript library for building status pages for continuous integration jobs
 How to use
 ---
 
-      <html>
+    <html>
 	<head>
 	    <link rel="stylesheet" href="./statusci.css"/>
 	    <script type="text/javascript" src="./statusci.js"></script>
 	</head>
       <body>
       	<!-- configures a Jenkins server url with optional credentials -->
-	<server id="default" url="http://yourjenkinshost:8080" username="admin" password="admin"></server>
-	<table width="100%">
-	    <tr>
-		<td>
-		    <!-- renders Jenkins job "job1" -->
-		    <jenkins_job server="default" id="job1" name="My Job"></jenkins_job>
-		</td>
-		<td>
-		    <jenkins_job server="default" id="job2"></jenkins_job>
-		</td>
-	    </tr>
-	</table>
-      </body>
-      </html>
+        <server id="default" url="http://yourjenkinshost:8080" username="admin" password="admin"></server>
+        <table width="100%">
+            <tr>
+            <td>
+                <!-- renders Jenkins job "job1" hosted by jenkins server named "default" -->
+                <jenkins_job server="default" id="job1" name="My Job"></jenkins_job>
+            </td>
+            <td>
+                <jenkins_job server="default" id="job2"></jenkins_job>
+            </td>
+            </tr>
+        </table>
+    </body>
+    </html>
 
 Build
 ---
