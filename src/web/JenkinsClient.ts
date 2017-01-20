@@ -27,10 +27,20 @@ export class JenkinsClient {
     /**
      * Fetches job data
      */
-    public readJob(jobId: string): Promise<JenkinsJobResponse> {
+    public read(jobId: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
 
         const url:string = this._baseUrl + "/job/" + encodeURIComponent(jobId) + "/api/json";
         return this.request(url).then((entity:any) => {
+            return entity;
+        });
+    }
+
+    /**
+     * Fetches job data
+     */
+    public readJob(job: JenkinsJobRefResponse): Promise<JenkinsJobResponse> {
+
+        return this.request(job.url).then((entity:any) => {
             return <JenkinsJobResponse> entity;
         });
     }
@@ -123,23 +133,37 @@ export class JenkinsClient {
 
 // ----------------------------
 
-export interface JenkinsBuildRefResponse {
 
-    _class: string,
-    number: number,
-    url: string
-}
 
+/**
+ * A single job representation
+ */
 export interface JenkinsJobResponse {
+
+    name:string,
+    displayName: string,
+    displayNameOrNull: string,
+    description: string,
+    url:string,
 
     builds: JenkinsBuildRefResponse[],
     lastBuild: JenkinsBuildRefResponse,
     color: string,
-    description: string,
+
+}
+
+/**
+ * Multi-branch jobs representation
+ */
+export interface JenkinsMultiJobResponse {
+
+    name:string,
     displayName: string,
     displayNameOrNull: string,
-    name:string,
-    url:string
+    description: string,
+    url:string,
+
+    jobs: JenkinsJobRefResponse[]
 }
 
 
@@ -153,12 +177,38 @@ export interface JenkinsBuildResponse {
     timestamp:number
 }
 
+export interface JenkinsBuildRefResponse {
+
+    _class: string,
+    number: number,
+    url: string
+}
+
+export interface JenkinsJobRefResponse {
+    name: string,
+    url: string,
+    color: string
+}
+
 export enum JenkinsBuildStatus {
     SUCCESS, WARN, ERROR, DISABLED, ABORTED, NOTBUILT, UNKNOWN
 }
 
 // ----------------------------
 
+/**
+ * Determines whether an entity is a {@link JenkinsJobResponse}
+ */
+export function isSingleJob(job:JenkinsJobResponse | JenkinsMultiJobResponse):boolean {
+        return !!(job as JenkinsJobResponse).builds;
+}
+
+/**
+ * Determines whether an entity is a {@link JenkinsMultiJobResponse}
+ */
+export function isMultiJob(job:JenkinsJobResponse | JenkinsMultiJobResponse):boolean {
+    return !!(job as JenkinsMultiJobResponse).jobs;
+}
 
 export function getBuildStatus(job:JenkinsJobResponse):JenkinsBuildStatus {
 
