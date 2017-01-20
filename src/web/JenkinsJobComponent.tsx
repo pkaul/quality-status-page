@@ -14,7 +14,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     private static LOADING_DONE:string      = "loading-done";
     private static LOADING_ERROR:string     = "loading-error";
 
-    private _refreshInterval:number = 3000;
+    private _refreshInterval:number = 5000;
     private _triggerHandle:number;
 
     constructor(props: JobProperties) {
@@ -107,8 +107,9 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     private triggerLoadJob():void {
 
         let interval:number = this._refreshInterval+Math.random()*500;
+
         this.setState({
-            "name": !!this.props.name ? this.props.name : this.props.id,
+            "name": this.getDisplayNameFromPropOrState(),
             "loadStatus": JenkinsJobComponent.LOADING,
         });
         this.loadJob().then((state: JobState | MultiJobState) => {
@@ -125,6 +126,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         const client: JenkinsClient = this.getClient();
         return client.read(this.props.id).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
 
+                // determine name: lookup explicit name from properties, from job definition and (fallback) use id
                 let name: string = !!this.props.name ? this.props.name : job.displayName;
                 if (!name) {
                     name = this.props.id;
@@ -151,7 +153,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
                     let multiJob: JenkinsMultiJobResponse = job as JenkinsMultiJobResponse;
                     return Promise.resolve({
-                        "name": this.props.id,
+                        "name": this.getDisplayNameFromPropOrState(),
                         "loadStatus": JenkinsJobComponent.LOADING_DONE,
                         "jobs": multiJob.jobs
                     }) as Promise<JobState | MultiJobState>;
@@ -165,7 +167,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             }, (error: any) => {
                 console.log("Error " + error);
                 return Promise.resolve({
-                    "name": !!this.props.name ? this.props.name : this.props.id,
+                    "name": this.getDisplayNameFromPropOrState(),
                     "loadStatus": JenkinsJobComponent.LOADING_ERROR,
                     "buildStatus": Styles.STATUS_NONE
                 } as JobState);
@@ -174,6 +176,18 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     // -----------
+
+    private getDisplayNameFromPropOrState():string {
+
+        if( !!this.state && this.state.name ) {
+            // name is already defined by state
+            return this.state.name;
+        }
+        else {
+            // use name or fallback to id
+            return !!this.props.name ? this.props.name : this.props.id;
+        }
+    }
 
     private getClient():JenkinsClient {
         let config:ServerConfig = this.getConfig();
