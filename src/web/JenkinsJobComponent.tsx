@@ -35,28 +35,36 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     public render():JSX.Element {
 
         if( !!(this.state as JobState).buildStatus ) {
-            return JenkinsJobComponent.renderJob(this.state as JobState);
+            return this.renderJob(this.state as JobState);
         }
-        else if( !!(this.state as MultiJobState) ) {
-            return JenkinsJobComponent.renderMultiJob(this.state as MultiJobState);
+        else if( !!(this.state as MultiJobState).jobs ) {
+            return this.renderMultiJob(this.state as MultiJobState);
         }
         else {
-            return JenkinsJobComponent.renderLoading(this.state as LoadingState);
+            return this.renderLoading(this.state as LoadingState);
         }
     }
 
     // --------------
 
-    private static renderLoading(job:LoadingState):JSX.Element {
+    private renderLoading(job:LoadingState):JSX.Element {
         let className:string = `status ${job.loadStatus}`;
         return <div className={className}><h3>{job.name}</h3></div>;
     }
 
-    private static renderMultiJob(jobs:MultiJobState):JSX.Element {
-        return null;
+    private renderMultiJob(jobs:MultiJobState):JSX.Element {
+
+        return <div>
+                    {
+                        jobs.jobs.map(item =>
+                            // dynamically create a React component with a virtual job id
+                            React.createElement(JenkinsJobComponent, {"server": this.props.server, "id": this.props.id+"/job/"+item.name}, null)
+                        )
+                    }
+                </div>;
     }
 
-    private static renderJob(job:JobState):JSX.Element {
+    private renderJob(job:JobState):JSX.Element {
 
         const now:number = new Date().getTime();
 
@@ -112,7 +120,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
 
-    private loadJob(): Promise<JobState | MultiJobState | LoadingState> {
+    private loadJob(): Promise<JobState | MultiJobState> {
 
         const client: JenkinsClient = this.getClient();
         return client.read(this.props.id).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
@@ -136,17 +144,18 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                             "building": isBuilding(singleJob),
                             "buildProgress": getProgressPercent(build),
                             "buildTimestamp": build.timestamp
-                        } as JobState)
+                        } as JobState) as Promise<JobState | MultiJobState>
                     });
                 }
-                // else if (isMultiJob(job)) {
-                //
-                //     return Promise.resolve({
-                //         "name": this.props.id,
-                //         "loadStatus": JenkinsJobComponent.LOADING_DONE,
-                //         "jobs": null
-                //     } as MultiJobState);
-                // }
+                else if (isMultiJob(job)) {
+
+                    let multiJob: JenkinsMultiJobResponse = job as JenkinsMultiJobResponse;
+                    return Promise.resolve({
+                        "name": this.props.id,
+                        "loadStatus": JenkinsJobComponent.LOADING_DONE,
+                        "jobs": multiJob.jobs
+                    }) as Promise<JobState | MultiJobState>;
+                }
                 else {
 
                     // not supported

@@ -27,9 +27,14 @@ export class JenkinsClient {
     /**
      * Fetches job data
      */
-    public read(jobId: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
+    public read(jobIdOrPath: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
 
-        const url:string = this._baseUrl + "/job/" + encodeURIComponent(jobId) + "/api/json";
+        // encode everything that is not a slash
+        let normalizedId:string = "";
+        jobIdOrPath.split("/").forEach((pathElement:string) => {normalizedId += (normalizedId.length > 0 ? "/" : "")+encodeURIComponent(pathElement)});
+
+        // must not apply encodeURIComponent() on job id since it might contain slashes!
+        const url:string = this._baseUrl + "/job/" + jobIdOrPath + "/api/json";
         return this.request(url).then((entity:any) => {
             return entity;
         });
