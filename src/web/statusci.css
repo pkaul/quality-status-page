@@ -127,7 +127,7 @@ body, table {
 }
 
 
-
+/* remote status information has been updated recently */
 .age-0 {
     opacity: 1;
 }
@@ -148,6 +148,7 @@ body, table {
     opacity: 0.6;
 }
 
+/* remote status information has been updated a while ago */
 .age-5 {
     opacity: 0.5;
 }

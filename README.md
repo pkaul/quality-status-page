@@ -18,11 +18,11 @@ How to use
 	<table width="100%">
 	    <tr>
 		<td>
-		    <!-- renders Jenkins job "MyJob" -->
-		    <jenkins_job server="default" name="MyJob"></jenkins_job>
+		    <!-- renders Jenkins job "job1" -->
+		    <jenkins_job server="default" id="job1" name="My Job"></jenkins_job>
 		</td>
 		<td>
-		    <jenkins_job server="default" name="MyJob2"></jenkins_job>
+		    <jenkins_job server="default" id="job2"></jenkins_job>
 		</td>
 	    </tr>
 	</table>

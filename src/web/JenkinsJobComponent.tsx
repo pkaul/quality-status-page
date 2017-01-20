@@ -23,7 +23,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     constructor(props: JobProperties) {
         super(props);
-        if( !props.server || !props.name ) {
+        if( !props.server || !props.id ) {
             throw new Error("Missing property 'server' and/or 'name': "+JSON.stringify(props));
         }
     }
@@ -45,7 +45,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         if( !this.state.building && this.state.buildTimestamp ) {
 
             // distinct age values are based on 6-hours intervals
-            age = Math.round((now - this.state.buildTimestamp) / 6 * 60 * 60 * 1000);
+            const ageIntervalMillis:number = 6 * 60 * 60 * 1000; // 6 hours
+            age = Math.round((now - this.state.buildTimestamp) / ageIntervalMillis);
             if (age < 0) {
                 age = 0;
             }
@@ -70,9 +71,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         }
         const infoString:string = "Date: "+new Date(this.state.buildTimestamp)+"\nTest: Hello";   // TODO
 
-
         return <div className={className} title={infoString}>
-                    <h3><a href={this.state.jobUrl} target="_blank">{this.props.name}</a></h3>
+                    <h3><a href={this.state.jobUrl} target="_blank">{this.state.name}</a></h3>
                     {progressBar}
                 </div>;
     }
@@ -83,6 +83,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
         let interval:number = this._refreshInterval+Math.random()*500;
         this.setState({
+            "name": !!this.props.name ? this.props.name : this.props.id,
             "loadStatus": "loading",
         });
         this.loadJob().then((state: JobState) => {
@@ -98,12 +99,17 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     private loadJob(): Promise<JobState> {
 
         const client:JenkinsClient = this.getClient();
-        return client.readJob(this.props.name).then((job: JenkinsJobResponse) => {
+        return client.readJob(this.props.id).then((job: JenkinsJobResponse) => {
 
                 return client.readBuild(job.lastBuild).then((build:JenkinsBuildResponse) => {
 
+                    let name:string = !!this.props.name ? this.props.name : job.displayName;
+                    if( !name ) {
+                        name = this.props.id;
+                    }
+
                     return {
-                        "name": this.props.name,
+                        "name": name,
                         "jobUrl": job.url,
                         "loadStatus": "loading-done",
                         "buildCount": job && job.builds ? job.builds.length : 0,
@@ -118,6 +124,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             }, (error: any) => {
                 console.log("Error " + error);
                 return {
+                    "name": !!this.props.name ? this.props.name : this.props.id,
                     "loadStatus": "loading-error",
                     "buildStatus": Styles.STATUS_NONE
                 };
@@ -159,12 +166,18 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
 
 export interface JobProperties {
+    // server (id from server element) to use for this use
     server: string,
-    name: string
+    // jenkins job id
+    id: string,
+    // optional human readable name to be shown by this component
+    name?:string
 }
 
 export interface JobState {
 
+    // display name
+    name:string;
     loadStatus: string;
     buildCount?: number;
     buildStatus?: string;

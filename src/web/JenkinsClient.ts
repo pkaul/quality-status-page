@@ -27,9 +27,9 @@ export class JenkinsClient {
     /**
      * Fetches job data
      */
-    public readJob(jobName: string): Promise<JenkinsJobResponse> {
+    public readJob(jobId: string): Promise<JenkinsJobResponse> {
 
-        const url:string = this._baseUrl + "/job/" + encodeURIComponent(jobName) + "/api/json";
+        const url:string = this._baseUrl + "/job/" + encodeURIComponent(jobId) + "/api/json";
         return this.request(url).then((entity:any) => {
             return <JenkinsJobResponse> entity;
         });
