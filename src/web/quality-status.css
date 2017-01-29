@@ -53,12 +53,17 @@ body, table {
     animation: building-none 2s infinite;
 }
 
-.loading-error {
+.loading.error {
     border-color: #ffa005;
+}
+
+.error {
+    background-color: #c0c0c0;
 }
 
 .loading {
     border-color: #000000;
+    background-color: #c0c0c0;
 }
 
 .status h3 {

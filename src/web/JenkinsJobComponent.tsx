@@ -11,22 +11,25 @@ import {Styles} from "./Styles";
  */
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState | MultiJobState | LoadingState > {
 
-    private static LOADING:string           = "loading";
-    private static LOADING_DONE:string      = "loading-done";
-    private static LOADING_ERROR:string     = "loading-error";
-
     private _refreshInterval:number = 5000;
     private _triggerHandle:number;
 
     constructor(props: JobProperties) {
         super(props);
-        if( !props.provider || !props.id ) {
-            throw new Error("Missing property 'provider' and/or 'name': "+JSON.stringify(props));
-        }
     }
 
     public componentWillMount():void {
-        this.triggerLoadJob();
+
+        if( !this.props.provider || !this.props.id ) {
+            this.setState({
+                name: this.getDisplayNameFromPropOrState(),
+                error: ErrorSource.CONFIG,
+                errorMessage: "Missing property 'provider' and/or 'id'"
+            });
+        }
+        else {
+            this.triggerLoadJob();
+        }
     }
 
     public componentWillUnmount():void {
@@ -42,15 +45,26 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             return this.renderMultiJob(this.state as MultiJobState);
         }
         else {
-            return this.renderLoading(this.state as LoadingState);
+            return this.renderGeneric(this.state as LoadingState);
         }
     }
 
     // --------------
 
-    private renderLoading(job:LoadingState):JSX.Element {
-        let className:string = `status ${job.loadStatus}`;
-        return <div className={className}><h3>{job.name}</h3></div>;
+    private renderGeneric(job:LoadingState):JSX.Element {
+
+        let statusClass:string = "";
+        if( job.loading ) {
+            statusClass += " "+Styles.LOADING;
+        }
+        else if( job.error ) {
+            statusClass += " "+Styles.ERROR;
+        }
+
+        let errorMessage:string = !!job.errorMessage ? job.errorMessage : "";
+
+        let className:string = `status${statusClass}`;
+        return <div className={className} title={errorMessage}><h3>{job.name}</h3></div>;
     }
 
     private renderMultiJob(jobs:MultiJobState):JSX.Element {
@@ -85,7 +99,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         }
 
         // const jobUrl = this.state.jobUrl;
-        let className:string = `status ${job.loadStatus} ${job.buildStatus}`;
+        let className:string = `status ${job.buildStatus}`;
         if( job.building ) {
             className += " building";
         }
@@ -115,7 +129,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
         this.setState({
             "name": this.getDisplayNameFromPropOrState(),
-            "loadStatus": JenkinsJobComponent.LOADING,
+            "loading": true,
         });
         this.loadJob().then((state: JobState | MultiJobState) => {
                 this.setState(state);
@@ -126,7 +140,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
 
-    private loadJob(): Promise<JobState | MultiJobState> {
+    private loadJob(): Promise<LoadingState | JobState | MultiJobState> {
 
         const client: JenkinsClient = this.getClient();
         return client.read(this.props.id).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
@@ -145,7 +159,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                         return Promise.resolve({
                             "name": name,
                             "url": job.url,
-                            "loadStatus": JenkinsJobComponent.LOADING_DONE,
+                            "loading": false,
                             "buildCount": singleJob && singleJob.builds ? singleJob.builds.length : 0,
                             "buildStatus": JenkinsJobComponent.asStatusStyle(singleJob),
                             "building": isBuilding(singleJob),
@@ -160,22 +174,27 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                     let multiJob: JenkinsMultiJobResponse = job as JenkinsMultiJobResponse;
                     return Promise.resolve({
                         "name": this.getDisplayNameFromPropOrState(),
-                        "loadStatus": JenkinsJobComponent.LOADING_DONE,
+                        "loading": false,
                         "jobs": multiJob.jobs
-                    }) as Promise<JobState | MultiJobState>;
+                    } as MultiJobState) as Promise<JobState | MultiJobState>;
                 }
                 else {
 
-                    // not supported
-                    throw new Error("Unsupported format: " + JSON.stringify(job));
+                    return Promise.resolve({
+                        name: this.getDisplayNameFromPropOrState(),
+                        loading: false,
+                        error: ErrorSource.PROVIDER,
+                        errorMessage: "Unexpected response format: "+JSON.stringify(job)
+                    } as LoadingState) as Promise<LoadingState>;
                 }
 
             }, (error: any) => {
-                console.log("Error " + error);
+
                 return Promise.resolve({
-                    "name": this.getDisplayNameFromPropOrState(),
-                    "loadStatus": JenkinsJobComponent.LOADING_ERROR,
-                    "buildStatus": Styles.STATUS_NONE
+                    name: this.getDisplayNameFromPropOrState(),
+                    loading: false,
+                    error: ErrorSource.LOADING,
+                    errorMessage: error
                 } as JobState);
             }
         );
@@ -223,6 +242,10 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 }
 
 
+enum ErrorSource {
+    CONFIG, LOADING, PROVIDER
+}
+
 
 
 
@@ -232,7 +255,8 @@ export interface JobProperties {
     // jenkins job id
     id: string,
     // optional human readable name to be shown by this component
-    name?:string
+    name?:string,
+
 }
 
 interface LoadingState {
@@ -240,7 +264,9 @@ interface LoadingState {
     name:string;
 
     // loading css class
-    loadStatus: string;
+    loading?: boolean;
+    error?:ErrorSource,
+    errorMessage?:string
 }
 
 interface JobState extends LoadingState {
