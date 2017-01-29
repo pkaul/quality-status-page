@@ -5,9 +5,9 @@ const NAMESPACE:string = '_serverconfig';
 
 
 /**
- * React component for defining server configurations)
+ * React component for defining a status provider, e.g. server attributes
  */
-export class ServerConfigComponent extends React.Component<ServerConfig, any> {
+export class StatusProviderComponent extends React.Component<ServerConfig, any> {
 
     constructor(props: ServerConfig) {
         super(props);

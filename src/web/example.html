@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 
 <head>
@@ -9,14 +10,14 @@
 <body>
 <h1>Quality Status: Example Page</h1>
 
-<server id="default" url="http://localhost:49001" username="admin" password="admin"></server>
+<status-provider id="default" url="http://localhost:49001" username="admin" password="admin"></status-provider>
 <table width="100%">
     <tr>
         <td>
-            <jenkins_job server="default" id="job1" name="My Display Name"></jenkins_job>
+            <jenkins-job provider="default" id="job1" name="My Display Name"></jenkins-job>
         </td>
         <td>
-            <jenkins_job server="default" id="job2"></jenkins_job>
+            <jenkins-job provider="default" id="job2"></jenkins-job>
         </td>
     </tr>
 </table>

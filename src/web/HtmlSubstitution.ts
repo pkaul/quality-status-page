@@ -25,7 +25,7 @@ export class HtmlSubstitution {
                 let reactComponentClass = this._elements[elementName];
                 let elements: NodeListOf<Element> = document.getElementsByTagName(elementName);
                 if( elements.length === 0 ) {
-                    console.info("No elements "+elementName+" found");
+                    console.log("No elements "+elementName+" found");
                 }
 
                 //console.info("Substituting elements "+elementName+" ...");
@@ -42,13 +42,13 @@ export class HtmlSubstitution {
                             elementAttributes[attribute.name] = attribute.value;
                         }
 
-                        console.info("Creating React element from " + elementName + " with " + JSON.stringify(elementAttributes));
+                        console.log("Creating React element from " + elementName + " with " + JSON.stringify(elementAttributes));
 
                         let reactElement: ReactElement<any> = React.createElement(reactComponentClass, elementAttributes, null);
                         ReactDOM.render(reactElement, element);
                     }
                     catch(e) {
-                        console.warn("Error substituting "+elementName, e);
+                        console.log("Error substituting "+elementName, e);
                     }
                 }
             }

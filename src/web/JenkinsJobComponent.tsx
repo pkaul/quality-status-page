@@ -3,7 +3,7 @@ import {
     JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus, isSingleJob, isMultiJob,
     JenkinsJobRefResponse, JenkinsMultiJobResponse, getHealth
 } from "./JenkinsClient";
-import {getConfig, ServerConfig} from "./ServerConfigComponent";
+import {getConfig, ServerConfig} from "./StatusProviderComponent";
 import {Styles} from "./Styles";
 
 /**
@@ -20,8 +20,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     constructor(props: JobProperties) {
         super(props);
-        if( !props.server || !props.id ) {
-            throw new Error("Missing property 'server' and/or 'name': "+JSON.stringify(props));
+        if( !props.provider || !props.id ) {
+            throw new Error("Missing property 'provider' and/or 'name': "+JSON.stringify(props));
         }
     }
 
@@ -59,7 +59,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                     {
                         jobs.jobs.map(item =>
                             // dynamically create a React component with a virtual job id
-                            React.createElement(JenkinsJobComponent, {"server": this.props.server, "id": this.props.id+"/job/"+item.name}, null)
+                            React.createElement(JenkinsJobComponent, {"provider": this.props.provider, "id": this.props.id+"/job/"+item.name}, null)
                         )
                     }
                 </div>;
@@ -201,7 +201,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     private getConfig():ServerConfig {
-        return getConfig(this.props.server);
+        return getConfig(this.props.provider);
     }
 
     private static asStatusStyle(job:JenkinsJobResponse):string {
@@ -227,8 +227,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
 
 export interface JobProperties {
-    // server (id from server element) to use for this use
-    server: string,
+    // provider id (references 'status-provider')
+    provider: string,
     // jenkins job id
     id: string,
     // optional human readable name to be shown by this component

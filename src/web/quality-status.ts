@@ -1,14 +1,14 @@
-// StatusCI entry point
+// Entry point
 
 import {HtmlSubstitution} from "./HtmlSubstitution";
 import {JenkinsJobComponent} from "./JenkinsJobComponent";
-import {ServerConfigComponent} from "./ServerConfigComponent";
+import {StatusProviderComponent} from "./StatusProviderComponent";
 
 
 document.addEventListener("DOMContentLoaded", () => {
     new HtmlSubstitution({
-        "server": ServerConfigComponent,
-        "jenkins_job": JenkinsJobComponent
+        "status-provider": StatusProviderComponent,
+        "jenkins-job": JenkinsJobComponent
     }).substitute();
 });
 
