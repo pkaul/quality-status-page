@@ -20,15 +20,15 @@ module.exports = function (grunt) {
         webpack: {
 
             dist: {
-                entry: "./target/web/statusci.js",
+                entry: "./target/web/quality-status.js",
                 output: {
-                    filename: "./target/dist/statusci.js"
+                    filename: "./target/dist/quality-status.min.js"
                 },
 
                 plugins: [
-                    // new webpack.optimize.UglifyJsPlugin({
-                    //     minimize: true
-                    // })
+                    new webpack.optimize.UglifyJsPlugin({
+                        minimize: true
+                    })
                 ]
             }
         },
