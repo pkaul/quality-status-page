@@ -3,6 +3,9 @@
  */
 export class Styles {
 
+    // item is currently being built
+    public static BUILDING:string       = "building";
+    // item is currently loading/refreshing
     public static LOADING:string        = "loading";
     public static ERROR:string          = "error";
 

@@ -11,6 +11,8 @@ import {Styles} from "./Styles";
  */
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState | MultiJobState | LoadingState > {
 
+    private static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
+
     private _refreshInterval:number = 5000;
     private _triggerHandle:number;
 
@@ -87,9 +89,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         let age:number = null;
         if( !job.building && job.buildTimestamp ) {
 
-            // distinct age values are based on 6-hours intervals
-            const ageIntervalMillis:number = 6 * 60 * 60 * 1000; // 6 hours
-            age = Math.round((now - job.buildTimestamp) / ageIntervalMillis);
+            age = Math.round((now - job.buildTimestamp) / JenkinsJobComponent.AGE_INTERVAL_MILLIS);
             if (age < 0) {
                 age = 0;
             }
@@ -98,7 +98,6 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             }
         }
 
-        // const jobUrl = this.state.jobUrl;
         let className:string = `status ${job.buildStatus}`;
         if( job.building ) {
             className += " building";
@@ -106,6 +105,11 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         if( age ) {
             className += " age-"+age;
         }
+
+        if( job.loading ) {
+            className += " "+Styles.LOADING;
+        }
+
 
         let progressBar = null;
         if( job.building ) {
