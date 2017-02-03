@@ -99,14 +99,35 @@ export class JenkinsClient {
                     resolve(jsonEntity);
                 }
                 else {
-                    reject("Error loading " + url + ": " + (!!response ? JSON.stringify(response) : null));
+                    console.info("Error loading " + url +": "+JSON.stringify(response));
+                    reject(this.getErrorMessage(response));
                 }
-            }).catch((e: Error) => {
-                console.info("Error accessing " + url +": "+JSON.stringify(e));
-                reject("Error loading " + url + ": " + (!!e ? JSON.stringify(e) : null));
+            }).catch((errorResponse: Object) => {
+                console.info("Error loading " + url +": "+JSON.stringify(errorResponse));
+                reject(this.getErrorMessage(errorResponse));
             });
         });
     }
+
+    private getErrorMessage(response:Object):string {
+
+        if( !!response ) {
+
+            if( response['error'] ) {
+                return response['error'];
+            }
+            else if( !!response['status'] && !!response['status']['code'] && !!response['status']['text'] ) {
+                return "HTTP "+response['status']['code']+": "+response['status']['text'];
+            }
+            else {
+                return "unknown";
+            }
+        }
+        else {
+            return "unknown";
+        }
+    }
+
 
     /**
      * Correct timestamp property from Jenkins entity based on server "Date".
