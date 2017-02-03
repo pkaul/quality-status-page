@@ -12,8 +12,9 @@ import {Styles} from "./Styles";
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState | MultiJobState | LoadingState > {
 
     private static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
+    private static REFRESH_INTERVAL_MILLIS:number = 5 * 1000; // 5 s
 
-    private _refreshInterval:number = 5000;
+    private _refreshInterval:number = JenkinsJobComponent.REFRESH_INTERVAL_MILLIS;
     private _triggerHandle:number;
 
     constructor(props: JobProperties) {
@@ -22,11 +23,11 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     public componentWillMount():void {
 
-        if( !this.props.provider || !this.props.id ) {
+        if( !this.props['provider-ref'] || !this.props['id-ref'] ) {
             this.setState({
                 name: this.getDisplayNameFromPropOrState(),
                 error: ErrorSource.CONFIG,
-                errorMessage: "Missing property 'provider' and/or 'id'"
+                errorMessage: "Missing property 'provider-ref' and/or 'id-ref'"
             });
         }
         else {
@@ -55,17 +56,17 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     private renderGeneric(job:LoadingState):JSX.Element {
 
-        let statusClass:string = "";
+        let statusClass:string = "status";
         if( job.loading ) {
             statusClass += " "+Styles.LOADING;
         }
-        else if( job.error ) {
+        if( job.error ) {
             statusClass += " "+Styles.ERROR;
         }
 
-        let errorMessage:string = !!job.errorMessage ? job.errorMessage : "";
+        let errorMessage:string = !!job.errorMessage ? "Error: "+job.errorMessage : "Error";
 
-        let className:string = `status${statusClass}`;
+        let className:string = `${statusClass}`;
         return <div className={className} title={errorMessage}><h3>{job.name}</h3></div>;
     }
 
@@ -75,7 +76,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                     {
                         jobs.jobs.map(item =>
                             // dynamically create a React component with a virtual job id
-                            React.createElement(JenkinsJobComponent, {"provider": this.props.provider, "id": this.props.id+"/job/"+item.name}, null)
+                            React.createElement(JenkinsJobComponent, {"provider-ref": this.props['provider-ref'], "id-ref": this.props['id-ref']+"/job/"+item.name}, null)
                         )
                     }
                 </div>;
@@ -147,12 +148,12 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     private loadJob(): Promise<LoadingState | JobState | MultiJobState> {
 
         const client: JenkinsClient = this.getClient();
-        return client.read(this.props.id).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
+        return client.read(this.props['id-ref']).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
 
                 // determine name: lookup explicit name from properties, from job definition and (fallback) use id
                 let name: string = !!this.props.name ? this.props.name : job.displayName;
                 if (!name) {
-                    name = this.props.id;
+                    name = this.props['id-ref'];
                 }
                 //
                 if (isSingleJob(job)) {
@@ -214,7 +215,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         }
         else {
             // use name or fallback to id
-            return !!this.props.name ? this.props.name : this.props.id;
+            return !!this.props.name ? this.props.name : this.props['id-ref'];
         }
     }
 
@@ -224,7 +225,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     private getConfig():ServerConfig {
-        return getConfig(this.props.provider);
+        return getConfig(this.props['provider-ref']);
     }
 
     private static asStatusStyle(job:JenkinsJobResponse):string {
@@ -247,7 +248,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
 
 enum ErrorSource {
-    CONFIG, LOADING, PROVIDER
+    CONFIG=1, LOADING=2, PROVIDER=3
 }
 
 
@@ -255,9 +256,9 @@ enum ErrorSource {
 
 export interface JobProperties {
     // provider id (references 'status-provider')
-    provider: string,
+    "provider-ref": string,
     // jenkins job id
-    id: string,
+    "id-ref": string,
     // optional human readable name to be shown by this component
     name?:string,
 
