@@ -69,5 +69,5 @@ support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) prot
 * `npm install`
 * `grunt`
 
-[![Build Status](https://travis-ci.org/pkaul/quality-status-page?branch=master)](https://travis-ci.org/pkaul/quality-status-page)
+[![Build Status](https://travis-ci.org/pkaul/quality-status-page.png?branch=master)](https://travis-ci.org/pkaul/quality-status-page)
 
