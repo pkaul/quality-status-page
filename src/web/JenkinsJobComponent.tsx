@@ -67,10 +67,10 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             statusClass += " "+Styles.ERROR;
         }
 
-        let errorMessage:string = !!job.errorMessage ? "Error: "+job.errorMessage : "Error";
+        let errorMessage:string = !!job.errorMessage ? job.errorMessage : "Error";
+        let jobLinkName = !!job.url ? <a href={job.url} target="_blank">{job.name}</a> : job.name;
 
-        let className:string = `${statusClass}`;
-        return <div className={className} title={errorMessage}><h3>{job.name}</h3></div>;
+        return <div className={statusClass} title={errorMessage}><h3>{jobLinkName}</h3></div>;
     }
 
     private renderMultiJob(jobs:MultiJobState):JSX.Element {
@@ -211,10 +211,11 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             }, (error: any) => {
 
                 return Promise.resolve({
+                    url: error['url'], // might be available. or not.
                     name: this.getDisplayNameFromPropOrState(),
                     loading: false,
                     error: ErrorSource.LOADING,
-                    errorMessage: error
+                    errorMessage: "Error: "+JSON.stringify(error)
                 } as JobState);
             }
         );
@@ -273,6 +274,7 @@ export interface JobProperties {
 interface LoadingState {
     // display name
     name:string;
+    url?:string;
 
     // whether the status is currently being loaded/refreshed
     loading?: boolean;
@@ -283,7 +285,6 @@ interface LoadingState {
 
 interface JobState extends LoadingState {
 
-    url:string;
     buildCount: number;
     buildStatus: string;
     // whether job is currently building

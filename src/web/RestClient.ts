@@ -53,23 +53,27 @@ export class RestClient {
                     resolve(jsonEntity);
                 }
                 else {
-                    reject(this.getErrorMessage(url, response));
+                    reject(RestClient.asRestError(url, response));
                 }
             }).catch((errorResponse: Object) => {
 
-                reject(this.getErrorMessage(url, errorResponse));
+                reject(RestClient.asRestError(url, errorResponse));
             });
         });
     }
 
-    protected getErrorMessage(url:string, response:Object):string {
+    private static asRestError(url:string, response:Object):RestError {
 
         console.info("Error loading " + url +" ("+(response ? ": "+JSON.stringify(response): "")+")");
 
         if( !!response ) {
 
             if( response['error'] ) {
-                return response['error'];
+                return {
+                    url: url,
+                    code: response['error'],
+                    message: "Check JavaScript console and/or web traffic for more details."
+                };
             }
             else if( !!response['status'] && !!response['status']['code'] ) {
 
@@ -77,20 +81,26 @@ export class RestClient {
                 let text:string = response['status']['text'];
                 if( code == 404 ) {
 
-                    text += "Not found or not authenticated / authorized."
+                    text += "Not found or not authenticated or not authorized."
                 }
 
-                let result:string = "Unexpected HTTP status "+code+": ("+text+") while loading "+url+". Check JavaScript console and/or web traffic.";
-
-                return result;
+                return {    url: url,
+                            code: code+"",
+                            message: text} as RestError;
 
             }
             else {
-                return "Unknown error while loading "+url+". Check JavaScript console and/or web traffic.";
+                return {
+                    url: url,
+                    code: "unknown",
+                    message: "Check JavaScript console and/or web traffic for more details."} as RestError;
             }
         }
         else {
-            return "Unknown error while loading "+url+". Check JavaScript console and/or web traffic.";
+            return {
+                url: url,
+                code: "unknown",
+                message: "Check JavaScript console and/or web traffic for more details."} as RestError;
         }
     }
 
@@ -119,6 +129,16 @@ export class RestClient {
             console.info("Error correcting timestamp", e);
         }
     }
+}
 
+
+export interface RestError {
+
+    /** URL that caused the error */
+    url:string,
+    /** error code */
+    code:string,
+    /** error message */
+    message?:string
 
 }
