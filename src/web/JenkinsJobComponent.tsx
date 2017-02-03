@@ -5,11 +5,13 @@ import {
 } from "./JenkinsClient";
 import {getConfig, ServerConfig} from "./StatusProviderComponent";
 import {Styles} from "./Styles";
+import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusComponent";
+
 
 /**
  * React component for rendering Jenkins job status
  */
-export class JenkinsJobComponent extends React.Component<JobProperties, JobState | MultiJobState | LoadingState > {
+export class JenkinsJobComponent extends StatusComponent {
 
     private static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
     private static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
@@ -17,22 +19,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     private _refreshInterval:number = JenkinsJobComponent.REFRESH_INTERVAL_MILLIS;
     private _triggerHandle:number;
 
-    constructor(props: JobProperties) {
+    constructor(props: StatusProperties) {
         super(props);
-    }
-
-    public componentWillMount():void {
-
-        if( !this.props['provider-ref'] || !this.props['id-ref'] ) {
-            this.setState({
-                name: this.getDisplayNameFromPropOrState(),
-                error: ErrorSource.CONFIG,
-                errorMessage: "Missing property 'provider-ref' and/or 'id-ref'"
-            });
-        }
-        else {
-            this.triggerLoadJob();
-        }
     }
 
     public componentWillUnmount():void {
@@ -41,8 +29,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     public render():JSX.Element {
 
-        if( !!(this.state as LoadingState).error ) {
-            return this.renderGeneric(this.state as LoadingState);
+        if( !!this.state.error ) {
+            return this.renderStatus(this.state);
         }
         else if( !!(this.state as JobState).buildStatus ) {
             return this.renderJob(this.state as JobState);
@@ -51,27 +39,12 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
             return this.renderMultiJob(this.state as MultiJobState);
         }
         else {
-            return this.renderGeneric(this.state as LoadingState);
+            return this.renderStatus(this.state);
         }
     }
 
     // --------------
 
-    private renderGeneric(job:LoadingState):JSX.Element {
-
-        let statusClass:string = "status";
-        if( job.loading ) {
-            statusClass += " "+Styles.LOADING;
-        }
-        if( job.error ) {
-            statusClass += " "+Styles.ERROR;
-        }
-
-        let errorMessage:string = !!job.errorMessage ? job.errorMessage : "Error";
-        let jobLinkName = !!job.url ? <a href={job.url} target="_blank">{job.name}</a> : job.name;
-
-        return <div className={statusClass} title={errorMessage}><h3>{jobLinkName}</h3></div>;
-    }
 
     private renderMultiJob(jobs:MultiJobState):JSX.Element {
 
@@ -131,7 +104,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         </div>;
     }
 
-    private triggerLoadJob():void {
+    protected doLoadStatus():void {
 
         let interval:number = this._refreshInterval+Math.random()*500;
 
@@ -141,14 +114,14 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         });
         this.loadJob().then((state: JobState | MultiJobState) => {
                 this.setState(state);
-                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(), interval);
+                this._triggerHandle = window.setTimeout(() => this.doLoadStatus(), interval);
             }).catch(() => {
-                this._triggerHandle = window.setTimeout(() => this.triggerLoadJob(), interval);
+                this._triggerHandle = window.setTimeout(() => this.doLoadStatus(), interval);
             });
     }
 
 
-    private loadJob(): Promise<LoadingState | JobState | MultiJobState> {
+    private loadJob(): Promise<Status> {
 
         const providerRef:string = this.props['provider-ref'];
         let config: ServerConfig = getConfig(providerRef);
@@ -205,7 +178,7 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
                         loading: false,
                         error: ErrorSource.PROVIDER,
                         errorMessage: "Unexpected response format: "+JSON.stringify(job)
-                    } as LoadingState) as Promise<LoadingState>;
+                    } as Status) as Promise<Status>;
                 }
 
             }, (error: any) => {
@@ -222,18 +195,6 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
     }
 
     // -----------
-
-    private getDisplayNameFromPropOrState():string {
-
-        if( !!this.state && this.state.name ) {
-            // name is already defined by state
-            return this.state.name;
-        }
-        else {
-            // use name or fallback to id
-            return !!this.props.name ? this.props.name : this.props['id-ref'];
-        }
-    }
 
     private static asStatusStyle(job:JenkinsJobResponse):string {
 
@@ -254,36 +215,8 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 }
 
 
-enum ErrorSource {
-    CONFIG=1, LOADING=2, PROVIDER=3
-}
 
-
-
-
-export interface JobProperties {
-    // provider id (references 'status-provider')
-    "provider-ref": string,
-    // jenkins job id
-    "id-ref": string,
-    // optional human readable name to be shown by this component
-    name?:string,
-
-}
-
-interface LoadingState {
-    // display name
-    name:string;
-    url?:string;
-
-    // whether the status is currently being loaded/refreshed
-    loading?: boolean;
-    // code if status couldn't be loaded/refreshed
-    error?:ErrorSource,
-    errorMessage?:string
-}
-
-interface JobState extends LoadingState {
+interface JobState extends Status {
 
     buildCount: number;
     buildStatus: string;
@@ -295,7 +228,7 @@ interface JobState extends LoadingState {
     buildHealth:number;
 }
 
-interface MultiJobState extends LoadingState {
+interface MultiJobState extends Status {
     jobs:JenkinsJobRefResponse[]
 }
 

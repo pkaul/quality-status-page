@@ -10,12 +10,7 @@ export class JenkinsClient extends RestClient {
      */
     public read(jobIdOrPath: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
 
-        // encode everything that is not a slash
-        let normalizedId:string = "";
-        jobIdOrPath.split("/").forEach((pathElement:string) => {normalizedId += (normalizedId.length > 0 ? "/" : "")+encodeURIComponent(pathElement)});
-
-        // must not apply encodeURIComponent() on job id since it might contain slashes!
-        const url:string = this._baseUrl + "/job/" + jobIdOrPath + "/api/json";
+        const url:string = this._baseUrl + "/job/" + RestClient.urlEncodeIdOrPath(jobIdOrPath) + "/api/json";
         return this.request(url).then((entity:any) => {
             return entity;
         });

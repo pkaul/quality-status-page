@@ -129,6 +129,15 @@ export class RestClient {
             console.info("Error correcting timestamp", e);
         }
     }
+
+    /**
+     * Url encodes a given ID or path by encoding path segments
+     */
+    protected static urlEncodeIdOrPath(idOrPath:string):string {
+        let result:string = "";
+        idOrPath.split("/").forEach((pathElement:string) => {result += (result.length > 0 ? "/" : "")+encodeURIComponent(pathElement)});
+        return result;
+    }
 }
 
 
