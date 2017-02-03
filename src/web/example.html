@@ -11,9 +11,15 @@
 <h1>Quality Status: Example Page</h1>
 
 <status-provider id="myjenkins" url="http://your.jenkins.host" username="jenkins_user" password="secret"></status-provider>
+
+<status-provider id="mytravis" url="https://api.travis-ci.org"></status-provider>
+
 <div class="layout-group">
     <jenkins-job provider-ref="myjenkins" id-ref="job1" name="My Display Name"></jenkins-job>
     <jenkins-job provider-ref="myjenkins" id-ref="job2"></jenkins-job>
+
+
+    <travis-build provider-ref="mytravis" id-ref="repositories/pkaul/quality-status-page"></travis-build>
 </div>
 
 
