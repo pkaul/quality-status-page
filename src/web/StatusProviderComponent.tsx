@@ -54,18 +54,20 @@ function setConfig(id:string, config:ServerConfig):void {
 }
 
 
+/**
+ * Provides a named config or null if no such config exists
+ */
 export function getConfig(id:string):ServerConfig {
 
     if(!id) {
         throw new Error("Missing id");
     }
     if( !window[NAMESPACE]) {
-        throw new Error("No config at all");
+        return null;
     }
     let result:ServerConfig = window[NAMESPACE][id];
     if( !result ) {
-
-        throw new Error("No config found for "+id);
+        return null;
     }
     return result;
 }

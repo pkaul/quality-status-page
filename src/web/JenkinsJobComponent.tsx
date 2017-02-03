@@ -12,7 +12,7 @@ import {Styles} from "./Styles";
 export class JenkinsJobComponent extends React.Component<JobProperties, JobState | MultiJobState | LoadingState > {
 
     private static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
-    private static REFRESH_INTERVAL_MILLIS:number = 5 * 1000; // 5 s
+    private static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
 
     private _refreshInterval:number = JenkinsJobComponent.REFRESH_INTERVAL_MILLIS;
     private _triggerHandle:number;
@@ -41,7 +41,10 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     public render():JSX.Element {
 
-        if( !!(this.state as JobState).buildStatus ) {
+        if( !!(this.state as LoadingState).error ) {
+            return this.renderGeneric(this.state as LoadingState);
+        }
+        else if( !!(this.state as JobState).buildStatus ) {
             return this.renderJob(this.state as JobState);
         }
         else if( !!(this.state as MultiJobState).jobs ) {
@@ -147,7 +150,19 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
 
     private loadJob(): Promise<LoadingState | JobState | MultiJobState> {
 
-        const client: JenkinsClient = this.getClient();
+        const providerRef:string = this.props['provider-ref'];
+        let config: ServerConfig = getConfig(providerRef);
+        if(!config) {
+            return Promise.resolve({
+                name: this.getDisplayNameFromPropOrState(),
+                loading: false,
+                error: ErrorSource.CONFIG,
+                errorMessage: "No provider config '"+providerRef+"' found"
+            });
+        }
+
+        // load job from provider
+        const client:JenkinsClient = new JenkinsClient(config.url, config.username, config.password);
         return client.read(this.props['id-ref']).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
 
                 // determine name: lookup explicit name from properties, from job definition and (fallback) use id
@@ -219,15 +234,6 @@ export class JenkinsJobComponent extends React.Component<JobProperties, JobState
         }
     }
 
-    private getClient():JenkinsClient {
-        let config:ServerConfig = this.getConfig();
-        return new JenkinsClient(config.url, config.username, config.password);
-    }
-
-    private getConfig():ServerConfig {
-        return getConfig(this.props['provider-ref']);
-    }
-
     private static asStatusStyle(job:JenkinsJobResponse):string {
 
         let status:JenkinsBuildStatus = getBuildStatus(job);
@@ -268,8 +274,9 @@ interface LoadingState {
     // display name
     name:string;
 
-    // loading css class
+    // whether the status is currently being loaded/refreshed
     loading?: boolean;
+    // code if status couldn't be loaded/refreshed
     error?:ErrorSource,
     errorMessage?:string
 }

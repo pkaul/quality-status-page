@@ -1,28 +1,9 @@
-
-import rest = require("rest");
-import basicAuth = require("rest/interceptor/basicAuth");
-import defaultRequest = require("rest/interceptor/defaultRequest");
-import {Client} from "rest";
-import {Request} from "rest";
-import {Response} from "rest";
-
-
-import {Promise} from 'es6-shim';
+import {RestClient} from "./RestClient";
 
 /**
  * (REST-) client for fetching job/build data from Jenkins
  */
-export class JenkinsClient {
-
-    private _baseUrl:string;
-    private _userName:string;
-    private _password:string;
-
-    constructor(baseUrl:string, userName:string, password:string) {
-        this._baseUrl = baseUrl;
-        this._userName = userName;
-        this._password = password;
-    }
+export class JenkinsClient extends RestClient {
 
     /**
      * Fetches job data
@@ -60,104 +41,8 @@ export class JenkinsClient {
             return <JenkinsBuildResponse> entity;
         });
     }
-
-    // -------------
-
-    private request(url:string):Promise<any> {
-
-        let client: Client = rest.getDefaultClient();
-
-        // if configured: send credentials via basic authorization
-        if(!!this._userName && !!this._password ) {
-            client = client.wrap(basicAuth, {username: this._userName, password: this._password});
-        }
-
-
-        client = client.wrap(defaultRequest, {
-            "method":   "GET",
-            "path":     url,
-            // enabling sending existing authentication cookie via CORS
-            "mixin":    {"withCredentials": true},
-        });
-
-        const request: Request = {
-            // "method": "GET",
-            // "path": url
-        };
-
-
-        return new Promise<JenkinsJobResponse>((resolve:(r:any)=>void, reject:(reason:any) => void) => {
-
-            client(request).then((response: Response) => {
-
-                //console.info("Received " + JSON.stringify(response)+" from "+url);
-
-                if (response.status.code === 200 && !!response.entity) {
-
-                    let jsonEntity: Object = JSON.parse(response.entity);
-                    // JenkinsClient.correctTimestamp(jsonEntity, response);
-                    resolve(jsonEntity);
-                }
-                else {
-                    console.info("Error loading " + url +": "+JSON.stringify(response));
-                    reject(this.getErrorMessage(response));
-                }
-            }).catch((errorResponse: Object) => {
-                console.info("Error loading " + url +": "+JSON.stringify(errorResponse));
-                reject(this.getErrorMessage(errorResponse));
-            });
-        });
-    }
-
-    private getErrorMessage(response:Object):string {
-
-        if( !!response ) {
-
-            if( response['error'] ) {
-                return response['error'];
-            }
-            else if( !!response['status'] && !!response['status']['code'] && !!response['status']['text'] ) {
-                return "HTTP "+response['status']['code']+": "+response['status']['text'];
-            }
-            else {
-                return "unknown";
-            }
-        }
-        else {
-            return "unknown";
-        }
-    }
-
-
-    /**
-     * Correct timestamp property from Jenkins entity based on server "Date".
-     * TODO: requires "Date" to be allowed via CORS
-     */
-    private static correctTimestamp(entity:Object, response:Response):void {
-
-        try {
-            const serverTimeString: string = response.headers["Date"];
-            if (entity.hasOwnProperty("timestamp") && !!serverTimeString) {
-                // server has sent a Date header
-                let currentTime: number = new Date().getTime();
-
-                let serverTime: number = new Date(serverTimeString).getTime();
-                let timeOffset: number = serverTime - currentTime;
-
-                console.info("Correcting time " + timeOffset);
-
-                entity['timestamp'] = entity['timestamp'] + timeOffset;
-            }
-        }
-        catch(e) {
-            console.info("Error correcting timestamp", e);
-        }
-    }
-
 }
 
-
-// ----------------------------
 
 
 
@@ -270,19 +155,10 @@ export function getBuildStatus(job:JenkinsJobResponse):JenkinsBuildStatus {
     }
 }
 
-
 export function isBuilding(job:JenkinsJobResponse):boolean {
     return !!job.color && job.color.indexOf("_anime") > -1;
 }
 
-// /**
-//  * Age of a build in milliseconds
-//  */
-// export function getAge(build:JenkinsBuildResponse):number {
-//
-//     let now:number = new Date().getTime();
-//     return now - (!!build.timestamp ? build.timestamp : 0)
-// }
 
 /**
  * Fetches job's current health
