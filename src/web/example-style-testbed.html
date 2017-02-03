@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Quality Status: Style Testbed</title>
+    <link rel="stylesheet" href="./quality-status.css"/>
+</head>
+
+<body>
+<h1>Quality Status: Testbed for CSS styles</h1>
+
+
+
+<div class="layout-group">
+
+    <h3>Erroneous job (currently building)</h3>
+    <div class="status status-error building">
+        <h3><a href="#">MyJob</a></h3>
+        <progress value="30" max="100"></progress>
+    </div>
+
+    <h3>Failed job</h3>
+    <div class="status status-warn">
+        <h3><a href="#">MyJob2</a></h3>
+    </div>
+
+    <h3>Succeeded job</h3>
+    <div class="status status-success">
+        <h3><a href="#">MyJob3</a></h3>
+    </div>
+
+    <h3>Succeeded (but outdated) job</h3>
+    <div class="status status-success age-4">
+        <h3><a href="#">MyJob4</a></h3>
+    </div>
+
+</div>
+
+
+</body>
+
+
+</html>

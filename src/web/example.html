@@ -10,38 +10,12 @@
 <body>
 <h1>Quality Status: Example Page</h1>
 
-<status-provider id="default" url="http://localhost:49001" username="admin" password="admin"></status-provider>
-<table width="100%">
-    <tr>
-        <td>
-            <jenkins-job provider="default" id="job1" name="My Display Name"></jenkins-job>
-        </td>
-        <td>
-            <jenkins-job provider="default" id="job2"></jenkins-job>
-        </td>
-    </tr>
-</table>
-
-
-<div style="width: 30%">
-    <div class="status status-error building">
-        <h3><a href="#">MyJob</a></h3>
-        <progress value="30" max="100"></progress>
-    </div>
-
-    <div class="status status-warn building">
-        <h3><a href="#">MyJob2</a></h3>
-        <progress value="10" max="100"></progress>
-    </div>
-
-    <div class="status status-success building">
-        <h3><a href="#">MyJob3</a></h3>
-        <progress value="70" max="100"></progress>
-    </div>
+<status-provider id="myjenkins" url="http://your.jenkins.host" username="jenkins_user" password="secret"></status-provider>
+<div class="layout-group">
+    <jenkins-job provider-ref="myjenkins" id-ref="job1" name="My Display Name"></jenkins-job>
+    <jenkins-job provider-ref="myjenkins" id-ref="job2"></jenkins-job>
 </div>
 
 
 </body>
-
-
 </html>

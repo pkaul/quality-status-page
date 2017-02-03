@@ -1,34 +1,68 @@
-Quality Status Page
-===
-
-JavaScript library for setting up HTML pages for showing various quality status, 
-	e.g. by whether continuous integration jobs have succeeded.
+# Quality Status Page
 
 
-How to use
----
+Library for building HTML pages for rendering quality status from various sources: 
+Simply add this library to your HTML page and add custom tags, e.g. for rendering a Jenkins job status. 
 
+
+## Example Usage
+
+    <!doctype html>
     <html>
-	<head>
-	    <link rel="stylesheet" href="./quality-status.css"/>
-	    <script type="text/javascript" src="./quality-status.min.js"></script>
-	</head>
-      <body>
-      	<!-- configures a Jenkins server url with optional credentials -->
-        <server id="default" url="http://yourjenkinshost:8080" username="admin" password="admin"></server>
-        <table width="100%">
-            <tr>
-            <td>
-                <!-- renders Jenkins job "job1" hosted by jenkins server named "default" -->
-                <jenkins_job server="default" id="job1" name="My Job"></jenkins_job>
-            </td>
-            <td>
-                <jenkins_job server="default" id="job2"></jenkins_job>
-            </td>
-            </tr>
-        </table>
+    
+    <head>
+        <title>Quality Status: Example Page</title>
+        <link rel="stylesheet" href="./quality-status.css"/>
+        <script type="text/javascript" src="./quality-status.min.js"></script>
+    </head>
+    
+    <body>
+        <h1>Quality Status: Example Page</h1>
+        
+        <status-provider id="myjenkins" url="http://your.jenkins.host" username="jenkins_user" password="secret"></status-provider>
+        
+        <div class="layout-group">
+        
+            <jenkins-job provider-ref="myjenkins" id-ref="job1" name="My Display Name"></jenkins-job>
+            <jenkins-job provider-ref="myjenkins" id-ref="job2"></jenkins-job>
+        
+        </div>
     </body>
     </html>
+
+## Tag Reference
+
+### &lt;jenkins-job&gt;
+Renders a Jenkins job status or (depending on configuration) a set of jobs.
+
+|Attribute|Required|Description|
+|---------|--------|-----------|
+|provider-ref|yes|ID referencing a Jenkins &lt;status-provider&gt;|
+|id-ref|yes|ID of Jenkins job to render. A multi branch pipeline job will be rendered as multiple status job|
+|name|no|A name to be used when rendering this status. If omitted, the job's name will be fetched from provider|
+
+### &lt;status-provider&gt;
+Specifies a server (e.g. Jenkins) that provides status data via HTTP/REST.
+
+|Attribute|Required|Description|
+|---------|--------|-----------|
+|id|yes|An arbitrary ID for referencing this provider|
+|url|yes|Provider's base url|
+|username|no|Username for authentication. Will be sent with every request if available. Can be omitted if a session cookie is available, e.g. by having logged in to this server manually (recommended)|
+|password|no|Password for above's user|
+
+
+#### Jenkins Security/CORS configuration
+For security reasons, modern web browsers prevent fetching data via AJAX as a default. In order to enable data to be fetched, servers (here: Jenkins) need to
+support [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) protocol. These steps need to be executed to make Jenkins aware or CORS
+
+* Install [Cors Filter Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Cors+Filter+Plugin) 
+* Configure `"Manage Jenkins" -> "Configure System" -> "CORS Filter"` like
+
+        Is Enabled:                     true
+        Access-Control-Allow-Origins:   * (or a list of "host:port")
+
+
 
 Build
 ---
@@ -37,12 +71,3 @@ Build
 * `grunt`
 
 
-
-Jenkins Configuration
----
-Fetching Jenkins job data is via AJAX is not allowed as a default. In order to enable Jenkins to serve data properly, these steps need to be executed
-* [Cors Filter Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Cors+Filter+Plugin) needs to be installed
-* In "Manage Jenkins" -> "Configure System" -> "CORS Filter" needs to be configured like
-        Is Enabled:                     true
-        Access-Control-Allow-Origins:   * (or a list of "host:port")
-        Access-Control-Allow-Methods:   GET
