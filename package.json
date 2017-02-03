@@ -1,6 +1,6 @@
 {
   "name": "quality-status-page",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "dependencies": {
     "es6-shim": "^0.35.2",
     "react": "^15.3.2",
