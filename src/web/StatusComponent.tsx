@@ -1,7 +1,14 @@
 import * as React from "react";
 import {Styles} from "./Styles";
+import {ServerConfig} from "./StatusProviderComponent";
 
 export abstract class StatusComponent extends React.Component<StatusProperties, Status> {
+
+    protected static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
+    protected static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
+
+    private _refreshInterval:number = StatusComponent.REFRESH_INTERVAL_MILLIS;
+    private _triggerHandle:number;
 
     public componentWillMount(): void {
 
@@ -13,8 +20,12 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
             });
         }
         else {
-            this.doLoadStatus();
+            this.triggerLoadStatus();
         }
+    }
+
+    public componentWillUnmount():void {
+        window.clearTimeout(this._triggerHandle);
     }
 
 
@@ -24,8 +35,7 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
 
     // ===============
 
-
-    protected abstract doLoadStatus():void;
+    protected abstract loadStatus():Promise<Status>;
 
     protected renderStatus(status: Status): JSX.Element {
 
@@ -55,6 +65,23 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
             return !!this.props.name ? this.props.name : this.props['id-ref'];
         }
     }
+
+    protected triggerLoadStatus():void {
+
+        let interval:number = this._refreshInterval+Math.random()*500;
+
+        this.setState({
+            "name": this.getDisplayNameFromPropOrState(),
+            "loading": true,
+        });
+        this.loadStatus().then((state: Status) => {
+            this.setState(state);
+            this._triggerHandle = window.setTimeout(() => this.triggerLoadStatus(), interval);
+        }).catch(() => {
+            this._triggerHandle = window.setTimeout(() => this.triggerLoadStatus(), interval);
+        });
+    }
+
 
 }
 

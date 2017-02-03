@@ -13,18 +13,9 @@ import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusCo
  */
 export class JenkinsJobComponent extends StatusComponent {
 
-    private static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
-    private static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
-
-    private _refreshInterval:number = JenkinsJobComponent.REFRESH_INTERVAL_MILLIS;
-    private _triggerHandle:number;
 
     constructor(props: StatusProperties) {
         super(props);
-    }
-
-    public componentWillUnmount():void {
-        window.clearTimeout(this._triggerHandle);
     }
 
     public render():JSX.Element {
@@ -104,24 +95,7 @@ export class JenkinsJobComponent extends StatusComponent {
         </div>;
     }
 
-    protected doLoadStatus():void {
-
-        let interval:number = this._refreshInterval+Math.random()*500;
-
-        this.setState({
-            "name": this.getDisplayNameFromPropOrState(),
-            "loading": true,
-        });
-        this.loadJob().then((state: JobState | MultiJobState) => {
-                this.setState(state);
-                this._triggerHandle = window.setTimeout(() => this.doLoadStatus(), interval);
-            }).catch(() => {
-                this._triggerHandle = window.setTimeout(() => this.doLoadStatus(), interval);
-            });
-    }
-
-
-    private loadJob(): Promise<Status> {
+    protected loadStatus(): Promise<Status> {
 
         const providerRef:string = this.props['provider-ref'];
         let config: ServerConfig = getConfig(providerRef);
