@@ -10,6 +10,8 @@ import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusCo
 
 /**
  * React component for rendering Jenkins job status
+ *
+ * ** EXPERIMENTAL **
  */
 export class TravisBuildComponent extends StatusComponent {
 
@@ -33,9 +35,13 @@ export class TravisBuildComponent extends StatusComponent {
         }
 
         const client:TravisClient = new TravisClient(config.url, config.username, config.password);
-        return client.read(this.props['id-ref']).then((job: TravisBuildResponse) => {
+        return client.read(this.props['id-ref']).then((response: TravisBuildResponse) => {
+            return {
 
-            return null; // TODO
+                // display name
+                name: this.getDisplayNameFromPropOrState(),
+                loading: false
+            } as Status;
         });
     }
 }
