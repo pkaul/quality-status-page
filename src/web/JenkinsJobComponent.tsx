@@ -39,7 +39,8 @@ export class JenkinsJobComponent extends StatusComponent {
 
     private renderMultiJob(jobs:MultiJobState):JSX.Element {
 
-        return <div>
+        return <div className="status-group">
+                    <h3><a href={this.state.url ? this.state.url : ""}>{this.getDisplayNameFromPropOrState()}</a></h3>
                     {
                         jobs.jobs.map(item =>
                             // dynamically create a React component with a virtual job id
