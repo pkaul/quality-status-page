@@ -2,7 +2,7 @@ import {RestClient} from "./RestClient";
 /**
  * (REST-) client for fetching build data from TravisCI
  *
- * ** EXPERIMENTAL **
+ * ******* EXPERIMENTAL *******
  */
 export class TravisClient extends RestClient {
 
@@ -11,8 +11,12 @@ export class TravisClient extends RestClient {
     /**
      * Fetches build data
      */
-    public read(uri: string): Promise<TravisBuildResponse> {
-        const url: string = this._baseUrl + "/"+RestClient.urlEncodeIdOrPath(uri)+".json";
+    public read(url: string): Promise<TravisBuildResponse> {
+
+        if( !url.endsWith(".json") ) {
+            url = url+".json";
+        }
+
         return this.request(url).then((entity: any) => {
             return entity;
         });

@@ -1,10 +1,4 @@
 import * as React from "react";
-import {
-    JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus, isSingleJob, isMultiJob,
-    JenkinsJobRefResponse, JenkinsMultiJobResponse, getHealth
-} from "./JenkinsClient";
-import {getConfig, ServerConfig} from "./StatusProviderComponent";
-import {Styles} from "./Styles";
 import {TravisClient, TravisBuildResponse} from "./TravisClient";
 import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusComponent";
 
@@ -15,30 +9,20 @@ import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusCo
  */
 export class TravisBuildComponent extends StatusComponent {
 
+    private client:TravisClient = new TravisClient();
+
     constructor(props: StatusProperties) {
         super(props);
     }
 
-
     protected loadStatus(): Promise<Status> {
 
-        // TODO remove this duplicate code
-        const providerRef:string = this.props['provider-ref'];
-        let config: ServerConfig = getConfig(providerRef);
-        if(!config) {
-            return Promise.resolve({
-                name: this.getDisplayNameFromPropOrState(),
-                loading: false,
-                error: ErrorSource.CONFIG,
-                errorMessage: "No provider config '"+providerRef+"' found"
-            });
-        }
+        const url:string = this.props.url;
+        const client:TravisClient = this.client;
 
-        const client:TravisClient = new TravisClient(config.url, config.username, config.password);
-        return client.read(this.props['id-ref']).then((response: TravisBuildResponse) => {
+        return client.read(url).then((response: TravisBuildResponse) => {
             return {
-
-                // display name
+                url: url,
                 name: this.getDisplayNameFromPropOrState(),
                 loading: false
             } as Status;

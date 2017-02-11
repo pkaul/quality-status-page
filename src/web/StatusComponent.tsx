@@ -11,11 +11,11 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
 
     public componentWillMount(): void {
 
-        if (!this.props['provider-ref'] || !this.props['id-ref']) {
+        if (!this.props.url) {
             this.setState({
                 name: this.getDisplayNameFromPropOrState(),
                 error: ErrorSource.CONFIG,
-                errorMessage: "Missing property 'provider-ref' and/or 'id-ref'"
+                errorMessage: "Missing property url'"
             });
         }
         else {
@@ -187,10 +187,8 @@ export enum ErrorSource {
 
 export interface StatusProperties {
 
-    // provider id (references 'status-provider')
-    "provider-ref": string,
-    // build id/path
-    "id-ref": string,
+    // URL to fetch item's status
+    url:string
     // optional human readable name to be shown by this component
     name?: string,
 

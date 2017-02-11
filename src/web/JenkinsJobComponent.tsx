@@ -3,8 +3,6 @@ import {
     JenkinsClient, JenkinsJobResponse, isBuilding, JenkinsBuildResponse, getProgressPercent, JenkinsBuildStatus, getBuildStatus, isSingleJob, isMultiJob,
     JenkinsJobRefResponse, JenkinsMultiJobResponse, getHealth
 } from "./JenkinsClient";
-import {getConfig, ServerConfig} from "./StatusProviderComponent";
-import {Styles} from "./Styles";
 import {StatusComponent, StatusProperties, Status, ErrorSource, Signal, MultiStatus} from "./StatusComponent";
 
 
@@ -13,6 +11,7 @@ import {StatusComponent, StatusProperties, Status, ErrorSource, Signal, MultiSta
  */
 export class JenkinsJobComponent extends StatusComponent {
 
+    private client:JenkinsClient = new JenkinsClient();
 
     constructor(props: StatusProperties) {
         super(props);
@@ -43,7 +42,7 @@ export class JenkinsJobComponent extends StatusComponent {
                     {
                         status.map(item =>
                             // dynamically create a React component with a virtual job id
-                            React.createElement(JenkinsJobComponent, {"provider-ref": this.props['provider-ref'], "id-ref": this.props['id-ref']+"/job/"+item.name}, null)
+                            React.createElement(JenkinsJobComponent, {"url": item.url}, null)
                         )
                     }
                 </div>;
@@ -96,25 +95,16 @@ export class JenkinsJobComponent extends StatusComponent {
 
     protected loadStatus(): Promise<Status> {
 
-        const providerRef:string = this.props['provider-ref'];
-        let config: ServerConfig = getConfig(providerRef);
-        if(!config) {
-            return Promise.resolve({
-                name: this.getDisplayNameFromPropOrState(),
-                loading: false,
-                error: ErrorSource.CONFIG,
-                errorMessage: "No provider config '"+providerRef+"' found"
-            });
-        }
+        // load status
+        const url:string = this.props.url;
+        const client:JenkinsClient = this.client;
 
-        // load job from provider
-        const client:JenkinsClient = new JenkinsClient(config.url, config.username, config.password);
-        return client.read(this.props['id-ref']).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
+        return client.read(url).then((job: JenkinsJobResponse | JenkinsMultiJobResponse) => {
 
                 // determine name: lookup explicit name from properties, from job definition and (fallback) use id
                 let name: string = !!this.props.name ? this.props.name : job.displayName;
                 if (!name) {
-                    name = this.props['id-ref'];
+                    name = this.props.url;
                 }
                 //
                 if (isSingleJob(job)) {
@@ -149,6 +139,7 @@ export class JenkinsJobComponent extends StatusComponent {
 
                     return Promise.resolve({
                         "name": this.getDisplayNameFromPropOrState(),
+                        "url": url,
                         "loading": false,
                         "children": children
                     } as MultiStatus) as Promise<Status>;
@@ -166,7 +157,7 @@ export class JenkinsJobComponent extends StatusComponent {
             }, (error: any) => {
 
                 return Promise.resolve({
-                    url: error['url'], // might be available. or not.
+                    url: url,
                     name: this.getDisplayNameFromPropOrState(),
                     loading: false,
                     error: ErrorSource.LOADING,
