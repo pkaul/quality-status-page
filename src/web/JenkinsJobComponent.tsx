@@ -5,7 +5,7 @@ import {
 } from "./JenkinsClient";
 import {getConfig, ServerConfig} from "./StatusProviderComponent";
 import {Styles} from "./Styles";
-import {StatusComponent, StatusProperties, Status, ErrorSource} from "./StatusComponent";
+import {StatusComponent, StatusProperties, Status, ErrorSource, Signal, MultiStatus} from "./StatusComponent";
 
 
 /**
@@ -18,31 +18,30 @@ export class JenkinsJobComponent extends StatusComponent {
         super(props);
     }
 
-    public render():JSX.Element {
-
-        if( !!this.state.error ) {
-            return this.renderStatus(this.state);
-        }
-        else if( !!(this.state as JobState).buildStatus ) {
-            return this.renderJob(this.state as JobState);
-        }
-        else if( !!(this.state as MultiJobState).jobs ) {
-            return this.renderMultiJob(this.state as MultiJobState);
-        }
-        else {
-            return this.renderStatus(this.state);
-        }
-    }
+    // public render():JSX.Element {
+    //
+    //     if( !!this.state.error ) {
+    //         return this.renderStatus(this.state);
+    //     }
+    //     else if( !!(this.state as JobState).buildStatus ) {
+    //         return this.renderJob(this.state as JobState);
+    //     }
+    //     else if( !!(this.state as MultiJobState).jobs ) {
+    //         return this.renderMultiJob(this.state as MultiJobState);
+    //     }
+    //     else {
+    //         return this.renderStatus(this.state);
+    //     }
+    // }
 
     // --------------
 
 
-    private renderMultiJob(jobs:MultiJobState):JSX.Element {
+    protected renderChildren(status:Status[]):JSX.Element {
 
         return <div className="status-group">
-                    <h3><a href={this.state.url ? this.state.url : ""}>{this.getDisplayNameFromPropOrState()}</a></h3>
                     {
-                        jobs.jobs.map(item =>
+                        status.map(item =>
                             // dynamically create a React component with a virtual job id
                             React.createElement(JenkinsJobComponent, {"provider-ref": this.props['provider-ref'], "id-ref": this.props['id-ref']+"/job/"+item.name}, null)
                         )
@@ -50,51 +49,50 @@ export class JenkinsJobComponent extends StatusComponent {
                 </div>;
     }
 
-    private renderJob(job:JobState):JSX.Element {
-
-        const now:number = new Date().getTime();
-
-        // age: distinct value between 0 and 5
-        let age:number = null;
-        if( !job.building && job.buildTimestamp ) {
-
-            age = Math.round((now - job.buildTimestamp) / JenkinsJobComponent.AGE_INTERVAL_MILLIS);
-            if (age < 0) {
-                age = 0;
-            }
-            if (age > 5) {
-                age = 5;
-            }
-        }
-
-        let className:string = `status ${job.buildStatus}`;
-        if( job.building ) {
-            className += " building";
-        }
-        if( age ) {
-            className += " age-"+age;
-        }
-
-        if( job.loading ) {
-            className += " "+Styles.LOADING;
-        }
-
-
-        let progressBar = null;
-        if( job.building ) {
-            progressBar =  <progress value={job.buildProgress} max="100"></progress>;
-        }
-
-        let info:string[] = ["Last built: "+new Date(job.buildTimestamp)];
-        if( job.buildHealth != null ) {
-             info.push("Health: "+job.buildHealth+"%");
-        }
-
-        return <div className={className} title={info.join("\n")}>
-            <h3><a href={job.url} target="_blank">{job.name}</a></h3>
-            {progressBar}
-        </div>;
-    }
+    // private renderJob(job:JobState):JSX.Element {
+    //
+    //     const now:number = new Date().getTime();
+    //
+    //     // age: distinct value between 0 and 5
+    //     let age:number = null;
+    //     if( !job.computing && job.time ) {
+    //
+    //         age = Math.round((now - job.time) / JenkinsJobComponent.AGE_INTERVAL_MILLIS);
+    //         if (age < 0) {
+    //             age = 0;
+    //         }
+    //         if (age > 5) {
+    //             age = 5;
+    //         }
+    //     }
+    //
+    //     let className:string = `status ${job.buildStatus}`;
+    //     if( job.building ) {
+    //         className += " building";
+    //     }
+    //     if( age ) {
+    //         className += " age-"+age;
+    //     }
+    //
+    //     if( job.loading ) {
+    //         className += " "+Styles.LOADING;
+    //     }
+    //
+    //     let progressBar = null;
+    //     if( job.computing ) {
+    //         progressBar =  <progress value={job.progress} max="100"></progress>;
+    //     }
+    //
+    //     let info:string[] = ["Last built: "+new Date(job.time)];
+    //     if( job.buildHealth != null ) {
+    //          info.push("Health: "+job.buildHealth+"%");
+    //     }
+    //
+    //     return <div className={className} title={info.join("\n")}>
+    //         <h3><a href={job.url} target="_blank">{job.name}</a></h3>
+    //         {progressBar}
+    //     </div>;
+    // }
 
     protected loadStatus(): Promise<Status> {
 
@@ -128,23 +126,32 @@ export class JenkinsJobComponent extends StatusComponent {
                             "name": name,
                             "url": job.url,
                             "loading": false,
-                            "buildCount": singleJob && singleJob.builds ? singleJob.builds.length : 0,
-                            "buildStatus": JenkinsJobComponent.asStatusStyle(singleJob),
-                            "building": isBuilding(singleJob),
-                            "buildProgress": getProgressPercent(build),
-                            "buildTimestamp": build.timestamp,
-                            "buildHealth": getHealth(singleJob)
-                        } as JobState) as Promise<JobState | MultiJobState>
+                            "signal": JenkinsJobComponent.asSignal(singleJob),
+                            "computing": isBuilding(singleJob),
+                            "progress": getProgressPercent(build),
+                            "time": build.timestamp,
+                            "health": getHealth(singleJob)
+                        } as Status) as Promise<Status>
                     });
                 }
                 else if (isMultiJob(job)) {
 
                     let multiJob: JenkinsMultiJobResponse = job as JenkinsMultiJobResponse;
+
+                    let children:Status[] = [];
+                    for( let i:number=0; i<multiJob.jobs.length; i++ ) {
+                        let child:JenkinsJobRefResponse = multiJob.jobs[i];
+                        children.push({
+                            name: child.name,
+                            url: child.url
+                        });
+                    }
+
                     return Promise.resolve({
                         "name": this.getDisplayNameFromPropOrState(),
                         "loading": false,
-                        "jobs": multiJob.jobs
-                    } as MultiJobState) as Promise<JobState | MultiJobState>;
+                        "children": children
+                    } as MultiStatus) as Promise<Status>;
                 }
                 else {
 
@@ -171,20 +178,20 @@ export class JenkinsJobComponent extends StatusComponent {
 
     // -----------
 
-    private static asStatusStyle(job:JenkinsJobResponse):string {
+    private static asSignal(job:JenkinsJobResponse):Signal {
 
         let status:JenkinsBuildStatus = getBuildStatus(job);
         if( status === JenkinsBuildStatus.SUCCESS ) {
-            return Styles.STATUS_SUCCESS;
+            return Signal.SUCCESS;
         }
         else if( status === JenkinsBuildStatus.WARN ) {
-            return Styles.STATUS_WARN;
+            return Signal.WARNING;
         }
         else if( status === JenkinsBuildStatus.ERROR ) {
-            return Styles.STATUS_ERROR;
+            return Signal.ERROR;
         }
         else {
-            return Styles.STATUS_NONE;
+            return Signal.UNKNOWN;
         }
     }
 }
@@ -193,7 +200,6 @@ export class JenkinsJobComponent extends StatusComponent {
 
 interface JobState extends Status {
 
-    buildCount: number;
     buildStatus: string;
     // whether job is currently building
     building:boolean;
