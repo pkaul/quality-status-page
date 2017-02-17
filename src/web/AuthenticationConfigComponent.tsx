@@ -9,8 +9,8 @@ export class AuthenticationConfigComponent extends React.Component<Authenticatio
     constructor(props: AuthenticationConfig) {
         super(props);
 
-        if( !props.base_url ) {
-            throw new Error("Missing base_url: "+JSON.stringify(props));
+        if( !props['base-url'] ) {
+            throw new Error("Missing base-url: "+JSON.stringify(props));
         }
         addConfig(props);
     }
@@ -21,10 +21,20 @@ export class AuthenticationConfigComponent extends React.Component<Authenticatio
 }
 
 export interface AuthenticationConfig {
-    base_url: string,
 
+    /**
+     * (Base) url where this config is bound to
+     */
+    "base-url": string,
+
+    // Username/password for basic authentication
     username?:string,
     password?:string
+
+    /**
+     * Whether to use cross side access control (-> CORS)
+     */
+    cors:boolean
 }
 
 
@@ -38,7 +48,7 @@ function addConfig(config:AuthenticationConfig):void {
         window[NAMESPACE] = {};
     }
 
-    let id:string = config.base_url;
+    let id:string = config['base-url']
 
     if( window[NAMESPACE].hasOwnProperty(id) ) {
         throw new Error("Config for "+id+" already exists");
@@ -68,7 +78,7 @@ export function getConfig(url:string):AuthenticationConfig {
 
         let current:AuthenticationConfig = configs[baseUrl];
         if( configs.hasOwnProperty(baseUrl) && url.startsWith(baseUrl) &&
-            (result == null || result.base_url.length < current.base_url.length)  ) {
+            (result == null || result['base-url'].length < current['base-url'].length)  ) {
             // use config only if it is more specific (=longer base url) than config found before
 
             result = current;

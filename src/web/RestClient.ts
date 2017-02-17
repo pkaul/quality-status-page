@@ -21,11 +21,12 @@ export class RestClient {
         }
 
 
+        let withCredentials:boolean = !!config && config.hasOwnProperty('cors') ? config.cors : false;
         client = client.wrap(defaultRequest, {
             "method":   "GET",
             "path":     url,
             // enabling sending existing authentication cookie via CORS
-            "mixin":    {"withCredentials": true},
+            "mixin":    {"withCredentials": withCredentials},
         });
 
         const request: Request = {

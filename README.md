@@ -12,21 +12,22 @@ Simply add this library to your HTML page and add custom tags, e.g. for renderin
     
     <head>
         <title>Quality Status: Example Page</title>
-        <link rel="stylesheet" href="https://pkaul.github.io/projects/quality-status-page/releases/0.2.0/quality-status.css"/>
-        <script type="text/javascript" src="https://pkaul.github.io/projects/quality-status-page/releases/0.2.0/quality-status.min.js"></script>
+        <link rel="stylesheet" href="https://pkaul.github.io/projects/quality-status-page/releases/0.3.0/quality-status.css"/>
+        <script type="text/javascript" src="https://pkaul.github.io/projects/quality-status-page/releases/0.3.0/quality-status.min.js"></script>
     </head>
     
     <body>
         <h1>Quality Status: Example Page</h1>
-        
-        <status-provider id="myjenkins" url="http://your.jenkins.host" username="jenkins_user" password="secret"></status-provider>
-        
+ 
         <div class="layout-group">
         
-            <jenkins-job provider-ref="myjenkins" id-ref="job1" name="My Display Name"></jenkins-job>
-            <jenkins-job provider-ref="myjenkins" id-ref="job2"></jenkins-job>
+            <jenkins-job url="http://myjenkins/jobs/job1" name="My Display Name"></jenkins-job>
+            <jenkins-job url="http://otherjenkins/jobs/job2"></jenkins-job>
         
         </div>
+        
+        <auth-config base-url="http://otherjenkins" cors="true"/>
+               
     </body>
     </html>
 
@@ -37,19 +38,18 @@ Renders a Jenkins job status or (depending on configuration) a set of jobs.
 
 |Attribute|Required|Description|
 |---------|--------|-----------|
-|provider-ref|yes|ID referencing a Jenkins &lt;status-provider&gt;|
-|id-ref|yes|ID of Jenkins job to render. A multi branch pipeline job will be rendered as multiple status job|
+|url|yes|Jenkins job's URL, e.g. `http://jenkinshost/job/jobname`. Single- as well as multi branch pipeline jobs are supported here|
 |name|no|A name to be used when rendering this status. If omitted, the job's name will be fetched from provider|
 
-### &lt;status-provider&gt;
-Specifies a server (e.g. Jenkins) that provides status data via HTTP/REST.
+### &lt;auth-config&gt;
+Authentication and security configuration for status provider (e.g. Jenkins). 
 
 |Attribute|Required|Description|
 |---------|--------|-----------|
-|id|yes|An arbitrary ID for referencing this provider|
-|url|yes|Provider's base url|
-|username|no|Username for authentication. Will be sent with every request if available. Can be omitted if a session cookie is available, e.g. by having logged in to this server manually (recommended)|
-|password|no|Password for above's user|
+|base-url|yes|Provider's base url, e.g. `http://jenkinshost`|
+|username|no|Basic authentication username. Will be sent with every request if available. Can be omitted if a session cookie is available, e.g. by having logged in to this server manually (recommended)|
+|password|no|Basic authentication password|
+|cors|no|Whether to enable Cross-Origin-Resource-Sharing (CORS). Typically needs to enabled when using existing session cookie for authentication. Requires server as well to support CORS (see below)|
 
 
 #### Jenkins Security/CORS configuration
