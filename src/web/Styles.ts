@@ -7,7 +7,7 @@ export class Styles {
     public static BUILDING:string       = "building";
     // item is currently loading/refreshing
     public static LOADING:string        = "loading";
-    public static ERROR:string          = "error";
+    public static LOADING_ERROR:string  = "loading-error";
 
     public static STATUS_SUCCESS:string = "status-success";
     public static STATUS_WARN:string    = "status-warn";

@@ -4,34 +4,29 @@ import rest = require("rest");
 import basicAuth = require("rest/interceptor/basicAuth");
 import defaultRequest = require("rest/interceptor/defaultRequest");
 import {Request} from "rest";
+import {getConfig, AuthenticationConfig} from "./AuthenticationConfigComponent";
 export class RestClient {
-
-    protected _baseUrl:string;
-    protected _userName:string;
-    protected _password:string;
-
-    constructor(baseUrl:string, userName:string, password:string) {
-        this._baseUrl = baseUrl;
-        this._userName = userName;
-        this._password = password;
-    }
-
 
     protected request(url:string):Promise<any> {
 
         let client: Client = rest.getDefaultClient();
+        let config:AuthenticationConfig = getConfig(url);
 
-        // if configured: send credentials via basic authorization
-        if(!!this._userName && !!this._password ) {
-            client = client.wrap(basicAuth, {username: this._userName, password: this._password});
+        // basic authentication
+        if(!!config && !!config.username && !!config.password ) {
+            client = client.wrap(basicAuth, {
+                username: config.username,
+                password: config.password
+            });
         }
 
 
+        let withCredentials:boolean = !!config && config.hasOwnProperty('cors') ? config.cors : false;
         client = client.wrap(defaultRequest, {
             "method":   "GET",
             "path":     url,
             // enabling sending existing authentication cookie via CORS
-            "mixin":    {"withCredentials": true},
+            "mixin":    {"withCredentials": withCredentials},
         });
 
         const request: Request = {
@@ -129,6 +124,15 @@ export class RestClient {
             console.info("Error correcting timestamp", e);
         }
     }
+    //
+    // /**
+    //  * Url encodes a given ID or path by encoding path segments
+    //  */
+    // protected static urlEncodeIdOrPath(idOrPath:string):string {
+    //     let result:string = "";
+    //     idOrPath.split("/").forEach((pathElement:string) => {result += (result.length > 0 ? "/" : "")+encodeURIComponent(pathElement)});
+    //     return result;
+    // }
 }
 
 

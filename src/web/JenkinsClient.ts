@@ -8,14 +8,11 @@ export class JenkinsClient extends RestClient {
     /**
      * Fetches job data
      */
-    public read(jobIdOrPath: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
+    public read(url: string): Promise<JenkinsJobResponse | JenkinsMultiJobResponse> {
 
-        // encode everything that is not a slash
-        let normalizedId:string = "";
-        jobIdOrPath.split("/").forEach((pathElement:string) => {normalizedId += (normalizedId.length > 0 ? "/" : "")+encodeURIComponent(pathElement)});
-
-        // must not apply encodeURIComponent() on job id since it might contain slashes!
-        const url:string = this._baseUrl + "/job/" + jobIdOrPath + "/api/json";
+        if( !url.endsWith("/api/json"))  {
+            url = url+"/api/json";
+        }
         return this.request(url).then((entity:any) => {
             return entity;
         });
@@ -26,7 +23,7 @@ export class JenkinsClient extends RestClient {
      */
     public readJob(job: JenkinsJobRefResponse): Promise<JenkinsJobResponse> {
 
-        return this.request(job.url).then((entity:any) => {
+        return this.read(job.url).then((entity:any) => {
             return <JenkinsJobResponse> entity;
         });
     }
@@ -36,8 +33,8 @@ export class JenkinsClient extends RestClient {
      */
     public readBuild(buildRef:JenkinsBuildRefResponse):Promise<JenkinsBuildResponse> {
 
-        const url:string = buildRef.url + "/api/json";
-        return this.request(url).then((entity:any) => {
+        const url:string = buildRef.url;
+        return this.read(url).then((entity:any) => {
             return <JenkinsBuildResponse> entity;
         });
     }

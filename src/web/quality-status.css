@@ -8,7 +8,7 @@ body, table {
 .status {
 
     min-width: 30px;
-    height: 3em;
+    min-height: 3em;
     border: 3px solid black;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -54,8 +54,9 @@ body, table {
     animation: building-none 2s infinite;
 }
 
-.error {
-    background-color: #ffdff9;
+.loading-error {
+    background-color: #FFFFFF;
+    border-color: #FF0000;
 }
 
 .loading {
