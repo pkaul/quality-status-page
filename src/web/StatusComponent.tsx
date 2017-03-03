@@ -159,6 +159,31 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
         });
     }
 
+    /**
+     * Helper that builds a new state object that resets all previous values in order to prevent merge. This is somehow related to "Immutability Helpers"
+     * @param newState values of new state object
+     * @return state object to store with #setState
+     */
+    protected asFreshState(newState:Object):Object {
+
+        var result:Object = {};
+
+        // 1.) add all keys from current state and set value to null ("reset")
+        for( var k in this.state ) {
+            if( this.state.hasOwnProperty(k) ) {
+                result[k] = null;
+            }
+        }
+        // 2.) add all key/value from new state
+        for( var k in newState ) {
+            if( newState.hasOwnProperty(k) ) {
+                result[k] = newState[k];
+            }
+        }
+
+        return result;
+    }
+
     private static signalAsStyle(signal:Signal):string {
 
         switch (signal) {

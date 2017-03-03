@@ -112,16 +112,16 @@ export class JenkinsJobComponent extends StatusComponent {
                     let singleJob: JenkinsJobResponse = job as JenkinsJobResponse;
                     return client.readBuild(singleJob.lastBuild).then((build: JenkinsBuildResponse) => {
 
-                        return Promise.resolve({
-                            "name": name,
-                            "url": job.url,
-                            "loading": false,
-                            "signal": JenkinsJobComponent.asSignal(singleJob),
-                            "computing": isBuilding(singleJob),
-                            "progress": getProgressPercent(build),
-                            "time": build.timestamp,
-                            "health": getHealth(singleJob)
-                        } as Status) as Promise<Status>
+                        return Promise.resolve(this.asFreshState({
+                            name:       name,
+                            url:        job.url,
+                            loading:    false,
+                            signal:     JenkinsJobComponent.asSignal(singleJob),
+                            computing:  isBuilding(singleJob),
+                            progress:   getProgressPercent(build),
+                            time:       build.timestamp,
+                            health:     getHealth(singleJob),
+                        }) as Status) as Promise<Status>
                     });
                 }
                 else if (isMultiJob(job)) {
@@ -137,32 +137,34 @@ export class JenkinsJobComponent extends StatusComponent {
                         });
                     }
 
-                    return Promise.resolve({
-                        "name": this.getDisplayNameFromPropOrState(),
-                        "url": url,
-                        "loading": false,
-                        "children": children
-                    } as MultiStatus) as Promise<Status>;
+                    return Promise.resolve(this.asFreshState({
+                        name:       this.getDisplayNameFromPropOrState(),
+                        url:        url,
+                        loading:    false,
+                        children:   children,
+                        error:      null,
+                        errorMessage: null
+                    }) as MultiStatus) as Promise<Status>;
                 }
                 else {
 
-                    return Promise.resolve({
+                    return Promise.resolve(this.asFreshState({
                         name: this.getDisplayNameFromPropOrState(),
                         loading: false,
                         error: ErrorSource.PROVIDER,
                         errorMessage: "Unexpected response format: "+JSON.stringify(job)
-                    } as Status) as Promise<Status>;
+                    }) as Status) as Promise<Status>;
                 }
 
             }, (error: any) => {
 
-                return Promise.resolve({
+                return Promise.resolve(this.asFreshState({
                     url: url,
                     name: this.getDisplayNameFromPropOrState(),
                     loading: false,
                     error: ErrorSource.LOADING,
                     errorMessage: "Error: "+JSON.stringify(error)
-                } as JobState);
+                }) as JobState);
             }
         );
     }
