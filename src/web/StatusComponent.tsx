@@ -4,9 +4,9 @@ import {Styles} from "./Styles";
 export abstract class StatusComponent extends React.Component<StatusProperties, Status> {
 
     protected static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
-    protected static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
+    protected static REFRESH_INTERVAL_MILLIS_DEFAULT:number = 30 * 1000; // 30 s
 
-    private _refreshInterval:number = StatusComponent.REFRESH_INTERVAL_MILLIS;
+    private _refreshInterval:number = StatusComponent.REFRESH_INTERVAL_MILLIS_DEFAULT;
     private _triggerHandle:number;
 
     public componentWillMount(): void {
@@ -145,7 +145,7 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
 
     protected triggerLoadStatus():void {
 
-        let interval:number = this._refreshInterval+Math.random()*500;
+        let interval:number = this._refreshInterval+Math.random()*500; // add a little random offset to spread the load a bit
 
         this.setState({
             "name": this.getDisplayNameFromPropOrState(),
