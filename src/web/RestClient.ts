@@ -67,7 +67,8 @@ export class RestClient {
                 return {
                     url: url,
                     code: response['error'],
-                    message: "Check JavaScript console and/or web traffic for more details."
+                    message: "Check JavaScript console and/or web traffic for more details.",
+                    details: JSON.stringify(response)
                 };
             }
             else if( !!response['status'] && !!response['status']['code'] ) {
@@ -81,14 +82,16 @@ export class RestClient {
 
                 return {    url: url,
                             code: code+"",
-                            message: text} as RestError;
+                            message: text,
+                            details: JSON.stringify(response)} as RestError;
 
             }
             else {
                 return {
                     url: url,
                     code: "unknown",
-                    message: "Check JavaScript console and/or web traffic for more details."} as RestError;
+                    message: "Check JavaScript console and/or web traffic for more details.",
+                    details: JSON.stringify(response)} as RestError;
             }
         }
         else {
@@ -143,6 +146,8 @@ export interface RestError {
     /** error code */
     code:string,
     /** error message */
-    message?:string
+    message?:string,
+    /** additional details */
+    details?:Object
 
 }
