@@ -12,8 +12,8 @@ Simply add this library to your HTML page and add custom tags, e.g. for renderin
     
     <head>
         <title>Quality Status: Example Page</title>
-        <link rel="stylesheet" href="https://pkaul.github.io/projects/quality-status-page/releases/0.3.0/quality-status.css"/>
-        <script type="text/javascript" src="https://pkaul.github.io/projects/quality-status-page/releases/0.3.0/quality-status.min.js"></script>
+        <link rel="stylesheet" href="https://pkaul.github.io/projects/quality-status-page/releases/0.4.0/quality-status.css"/>
+        <script type="text/javascript" src="https://pkaul.github.io/projects/quality-status-page/releases/0.4.0/quality-status.min.js"></script>
     </head>
     
     <body>
