@@ -1,11 +1,11 @@
 # Quality Status Page
 
 
-Library for building HTML pages for rendering quality status from various sources: 
-Simply add this library to your HTML page and add custom tags, e.g. for rendering a Jenkins job status. 
+Library for building HTML pages that render status information, e.g. from Jenkins jobs. 
 
+## Example
+Simply load this library into your HTML page and add custom tags like: 
 
-## Example Usage
 
     <!doctype html>
     <html>
