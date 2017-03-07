@@ -4,9 +4,9 @@ import {Styles} from "./Styles";
 export abstract class StatusComponent extends React.Component<StatusProperties, Status> {
 
     protected static AGE_INTERVAL_MILLIS:number = 24 * 60 * 60 * 1000; // 24 hours
-    protected static REFRESH_INTERVAL_MILLIS:number = 10 * 1000; // 10 s
+    protected static REFRESH_INTERVAL_MILLIS_DEFAULT:number = 30 * 1000; // 30 s
 
-    private _refreshInterval:number = StatusComponent.REFRESH_INTERVAL_MILLIS;
+    private _refreshInterval:number = StatusComponent.REFRESH_INTERVAL_MILLIS_DEFAULT;
     private _triggerHandle:number;
 
     public componentWillMount(): void {
@@ -145,7 +145,7 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
 
     protected triggerLoadStatus():void {
 
-        let interval:number = this._refreshInterval+Math.random()*500;
+        let interval:number = this._refreshInterval+Math.random()*500; // add a little random offset to spread the load a bit
 
         this.setState({
             "name": this.getDisplayNameFromPropOrState(),
@@ -157,6 +157,31 @@ export abstract class StatusComponent extends React.Component<StatusProperties, 
         }).catch(() => {
             this._triggerHandle = window.setTimeout(() => this.triggerLoadStatus(), interval);
         });
+    }
+
+    /**
+     * Helper that builds a new state object that resets all previous values in order to prevent merge. This is somehow related to "Immutability Helpers"
+     * @param newState values of new state object
+     * @return state object to store with #setState
+     */
+    protected asFreshState(newState:Object):Object {
+
+        var result:Object = {};
+
+        // 1.) add all keys from current state and set value to null ("reset")
+        for( var k in this.state ) {
+            if( this.state.hasOwnProperty(k) ) {
+                result[k] = null;
+            }
+        }
+        // 2.) add all key/value from new state
+        for( var k in newState ) {
+            if( newState.hasOwnProperty(k) ) {
+                result[k] = newState[k];
+            }
+        }
+
+        return result;
     }
 
     private static signalAsStyle(signal:Signal):string {
