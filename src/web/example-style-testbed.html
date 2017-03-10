@@ -4,6 +4,14 @@
 <head>
     <title>Quality Status: Style Testbed</title>
     <link rel="stylesheet" href="./quality-status.css"/>
+
+    <style type="text/css">
+        div.group {
+
+            float: left;
+            width: 300px;
+        }
+    </style>
 </head>
 
 <body>
@@ -48,6 +56,66 @@
                 <h3><a href="#">MyJob6c</a></h3>
             </div>
         </div>
+    </div>
+
+
+
+    <div class="group">
+
+        <h3>Development/CI</h3>
+
+        <div class="status status-success">
+            <h3><a href="#">master</a></h3>
+        </div>
+
+        <div class="status">
+            <h3><a href="#">Feature Branches</a></h3>
+            <div class="status-group">
+                <div class="status status-success">
+                    <h3><a href="#">feature-1_1</a></h3>
+                </div>
+                <div class="status status-warn">
+                    <h3><a href="#">feature-1_2</a></h3>
+                </div>
+                <div class="status status-success building">
+                    <h3><a href="#">feature-1_3</a></h3>
+                    <progress value="30" max="100"></progress>
+                </div>
+                <div class="status status-error">
+                    <h3><a href="#">feature-1_4</a></h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="group">
+
+        <h3>Staging</h3>
+
+        <div class="status status-success">
+            <h3><a href="#">Deployment</a></h3>
+        </div>
+
+        <div class="status status-success">
+            <h3><a href="#">Integration Tests</a></h3>
+        </div>
+
+    </div>
+
+    <div class="group">
+
+        <h3>Production</h3>
+
+        <div class="status status-success age-4">
+            <h3><a href="#">Deployment</a></h3>
+        </div>
+
+        <div class="status status-success  age-4">
+            <h3><a href="#">Integration Tests</a></h3>
+        </div>
+
     </div>
 
 

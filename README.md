@@ -1,10 +1,16 @@
 # Quality Status Page
 
 
-Library for building HTML pages that render status information, e.g. from Jenkins jobs. 
+Library for building pages that render status information., e.g. from Jenkins jobs. Simply load it into your HTML page and add a custom element for each job.
+
 
 ## Example
-Simply load this library into your HTML page and add custom tags like: 
+
+![Example Screenshot](./status_example.png)
+
+
+
+HTML for setting up a status page looks like
 
 
     <!doctype html>
@@ -17,19 +23,18 @@ Simply load this library into your HTML page and add custom tags like:
     </head>
     
     <body>
-        <h1>Quality Status: Example Page</h1>
- 
-        <div class="layout-group">
+    
+        <h3>Development/CI</h3>
+        <jenkins-job url="http://jenkins1/jobs/myservice-master-ci" name="master"></jenkins-job>
+        <jenkins-job url="http://jenkins1/jobs/myservice-branches-ci" name="Feature Branches"></jenkins-job>
         
-            <jenkins-job url="http://myjenkins/jobs/job1" name="My Display Name"></jenkins-job>
-            <jenkins-job url="http://otherjenkins/jobs/job2"></jenkins-job>
+        ...
         
-        </div>
-        
-        <auth-config base-url="http://otherjenkins" cors="true"/>
+        <auth-config base-url="http://jenkins1" cors="true"/>
                
     </body>
     </html>
+
 
 ## Tag Reference
 
